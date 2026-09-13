@@ -49,3 +49,8 @@ small list thumbnails |
 - Bump `VERSION` in `sw.js` whenever the precached file list changes.
 - Photos are open-licenced from Wikimedia Commons. Adding one means adding the
   row to `CREDITS.md` too — CC BY and CC BY-SA both require attribution.
+- Items carry `pin` (verified lat,lng), `addr`, `spot` and `links`. A `pin` is
+  only ever added when the coordinate was confirmed against a named map feature
+  or two independent sources; otherwise use `addr` alone and say so in the note.
+- `route` draws a path on Google Maps: `{m,f,t,v,l}` for mode, from, to,
+  pipe-separated waypoints and a label.
