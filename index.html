@@ -116,9 +116,10 @@ main{padding:4px 16px 0}
   -webkit-user-select:none;user-select:none;cursor:grab}
 .mapstage svg{position:absolute;inset:0;width:100%;height:100%;display:block}
 .towns,.mkrs{position:absolute;inset:0;pointer-events:none}
-.town{position:absolute;left:0;top:0;margin:-9px 0 0 -4px;white-space:nowrap;font-size:.7rem;font-weight:700;
-  color:#6B4750;letter-spacing:.02em;padding:1px 6px 1px 3px;border-radius:999px;background:rgba(255,246,242,.78)}
-.town span{display:inline-block;width:7px;height:7px;border-radius:50%;background:#8B5F68;margin-right:4px;vertical-align:middle}
+.town{position:absolute;left:0;top:0;margin:-9px 0 0 6px;white-space:nowrap;font-size:.7rem;font-weight:700;
+  color:#6B4750;letter-spacing:.02em;padding:1px 6px;border-radius:999px;background:rgba(255,246,242,.78)}
+.town.l{margin:-9px 0 0 -6px}.town.b{margin:14px 0 0 0}.town.a{margin:-14px 0 0 0}
+.tdot{position:absolute;left:0;top:0;width:7px;height:7px;margin:-3.5px 0 0 -3.5px;border-radius:50%;background:#8B5F68}
 .mkr{position:absolute;left:0;top:0;width:26px;height:26px;margin:-13px 0 0 -13px;pointer-events:auto;cursor:pointer}
 .mkr i{display:flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;
   border:2px solid var(--c);background:var(--b);font-style:normal;font-size:14px;line-height:1;
@@ -128,7 +129,6 @@ main{padding:4px 16px 0}
   font-size:.74rem;font-weight:700;color:var(--ink);background:rgba(255,246,242,.9);padding:2px 6px;border-radius:6px;
   box-shadow:0 1px 2px rgba(79,20,27,.12);pointer-events:none;max-width:230px;overflow:hidden;text-overflow:ellipsis}
 .mkr.lbl b{visibility:visible}
-.mkr.lbl-l b{left:auto;right:30px}
 .mzoom{position:absolute;left:10px;bottom:10px;display:flex;flex-direction:column;gap:6px}
 .mzoom button{width:40px;height:40px;border-radius:10px;background:var(--paper);border:1.5px solid var(--hair);
   font-size:1.35rem;font-weight:700;color:var(--rose-deep);box-shadow:0 2px 6px rgba(79,20,27,.18)}
@@ -321,7 +321,7 @@ const PHOTOS={
 const ORDER=['note','tour','ride','wear','shop','art','walk','beach','eat','trip'];
 
 /* ---- seeded content ---- */
-const SEED_V=14;
+const SEED_V=15;
 const SEED=[
 /* ===== practical ===== */
 {id:'n1',cat:'note',route:{m:'driving',f:'-27.36987,153.06499',t:'-26.52813,153.09161',v:'',l:'Virginia depot to the holiday park, about 110km'},wherelab:'Where you land',spot:'Brisbane Airport, domestic terminal',addr:'Airport Dr, Brisbane Airport QLD 4008',pin:'-27.38565,153.11849',links:[['Brisbane Airport — terminal info','https://www.bne.com.au/']],photo:'img/n1.jpg',must:1,day:'d1',title:'Monday — Brisbane to Coolum',
@@ -526,7 +526,7 @@ const SEED=[
 {id:'e6',cat:'eat',wherelab:'Where to sit',spot:'Tickle Park',addr:'Beach Rd at Birtwill St, Coolum Beach QLD 4573',pin:'-26.53035,153.09227',links:[['Coolum Beach — Visit Sunshine Coast','https://www.visitsunshinecoast.com/coolum']],title:'Fish and chips at Tickle Park',
  place:'Tickle Park Coolum Beach',
  note:'Takeaway from the strip, eaten on the grass under the pandanus with the beach in front of you. Cheapest good dinner in town and, on a solo trip, easily the most pleasant.\n\nGet there before the light goes at 6.\n\nBuy the fish and chips on the strip, then eat them on the grass under the pandanus with the beach in front of you. Tickle Park is the patch of lawn between Birtwill Street and the sand, with tables, taps and toilets.\n\nCheapest good dinner in town and, alone, easily the most pleasant — nobody is sitting opposite an empty chair.\n\nGet there before the light goes at about 6. The surf school trailer parks here too, so it is a busy little corner in the mornings.'},
-{id:'e8',cat:'eat',mappin:'-26.53135,153.09238',must:1,title:'Benny\'s Espresso — the coffee answer',
+{id:'e8',cat:'eat',mappin:'-26.53135,153.09238',must:1,title:'Benny\'s Espresso',
  place:'Bennys Espresso Coolum Beach',
  wherelab:'Closest good coffee',spot:"Benny's Espresso",addr:'16/1776 David Low Way, Coolum Beach QLD 4573',
  links:[["Benny's Espresso",'https://bennysespresso.com.au/'],['Slide Coffee Roasters','https://www.slidecoffee.com.au/']],
@@ -775,32 +775,55 @@ function mapDraw(){
   // so their names stack in a column beside the ring instead of piling up.
   const CLOSE=0.1;   // closer than this, place names beat town names; wider, towns win
   const towns=TOWNS.filter(([,,,rk])=>rk===1||MV.span<=0.36).map(([nm,la,lo])=>{
-    const [x,y]=px(lo,wy(la)); const tw=nm.length*6.8+16;
-    return {nm,x,y,box:[x-4,y-18,x-4+tw,y+4],on:x>-60&&x<W+60&&y>-20&&y<H+20};}).filter(t=>t.on);
+    const [x,y]=px(lo,wy(la)); const tw=nm.length*6.8+12;
+    const opts={r:[x+6,y-9,x+6+tw,y+9],l:[x-6-tw,y-9,x-6,y+9],b:[x-tw/2,y+14,x+tw/2,y+32],a:[x-tw/2,y-32,x+tw/2,y-14]};
+    return {nm,x,y,v:'r',opts,box:opts.r,on:x>-60&&x<W+60&&y>-20&&y<H+20};}).filter(t=>t.on);
   const hit=(a,b)=>a[0]<b[2]&&a[2]>b[0]&&a[1]<b[3]&&a[3]>b[1];
-  const boxes=[], groups={};
+  const groups={};
   shown.forEach(a=>{const k=a.p.la+','+a.p.lo;(groups[k]=groups[k]||[]).push(a);});
-  Object.values(groups).forEach(g=>{
+  // measure every name at its natural width in one pass, then decide sides
+  shown.forEach(a=>a.n.querySelector('b').style.maxWidth='none');
+  const lay=Object.values(groups).map(g=>{
     const cnt=g.length, bx=g[0].bx, by=g[0].by, pad=cnt>1?13:0;
-    const lw=Math.max(...g.map(a=>a.n.querySelector('b').offsetWidth));
-    const left=bx+17+pad+lw>W&&bx-17-pad-lw>0;          // flip when it would run off the right
-    const xlo=left?bx-17-pad-lw:bx+17+pad, xhi=xlo+lw, ylo=by-cnt*11-4, yhi=by+cnt*11+4;
-    const box=[xlo,ylo,xhi,yhi];
-    const clear=bx>=0&&bx<=W&&(MV.span<=0.02||
-      !shown.some(o=>!g.includes(o)&&o.x>xlo-16&&o.x<xhi+16&&o.y>ylo-16&&o.y<yhi+16))
-      &&!(MV.span>CLOSE&&towns.some(t=>hit(t.box,box)));
+    const nat=Math.max(...g.map(a=>a.n.querySelector('b').offsetWidth));
+    const cand=left=>{const room=(left?bx-17-pad:W-(bx+17+pad))-4, lw=Math.min(nat,room), xlo=left?bx-17-pad-lw:bx+17+pad;
+      return {left,lw,fits:lw>=56,box:[xlo,by-cnt*11-2,xlo+lw,by+cnt*11+2]};};   // shrinks to fit, with an ellipsis
+    const R=cand(false), L=cand(true);
+    const c=nat>R.lw&&L.lw>R.lw?[L,R]:[R,L];        // the side with more room goes first
+    return {g,cnt,bx,pad,c,box:c[0].box,fits:c[0].fits};
+  }).sort((a,b)=>b.cnt-a.cnt);
+  // towns: if the name would sit on a place name, another town, a ring or the stage edge,
+  // try the other side of the dot, then below, then above; in close, a town with nowhere to go is dropped
+  const placed=[];
+  towns.forEach(t=>{
+    const score=b=>(b[0]<0||b[2]>W||placed.some(q=>hit(q,b))?100:0)+shown.filter(o=>hit([o.x-13,o.y-13,o.x+13,o.y+13],b)).length;
+    const clash=b=>lay.some(l=>l.fits&&hit(l.box,b));
+    const c=['r','l','b','a'].map(k=>({k,s:score(t.opts[k]),c:clash(t.opts[k])}));
+    const v=c.find(o=>!o.s&&!o.c)||c.find(o=>!o.s)||(MV.span>CLOSE?c.filter(o=>o.s<100).sort((a,b)=>a.s-b.s)[0]:null);
+    if(!v){t.hide=true;return;}
+    t.v=v.k; t.box=t.opts[v.k]; placed.push(t.box);
+  });
+  const boxes=[];
+  lay.forEach(({g,cnt,bx,pad,c})=>{
+    const ok=o=>o.fits&&bx>=0&&bx<=W&&!boxes.some(q=>hit(q,o.box))
+      &&(MV.span<=0.02||!shown.some(m=>!g.includes(m)&&m.x>o.box[0]-16&&m.x<o.box[2]+16&&m.y>o.box[1]-16&&m.y<o.box[3]+16))
+      &&!(MV.span>CLOSE&&towns.some(t=>!t.hide&&hit(t.box,o.box)));
+    const use=c.find(ok), {left,lw}=use||c[0];       // try the other side before giving up
     g.forEach((a,k)=>{
       const lab=a.n.querySelector('b');
+      lab.style.maxWidth=`${lw.toFixed(1)}px`;
       lab.style.top=`calc(50% + ${((k-(cnt-1)/2)*22-a.p.oy).toFixed(1)}px)`;
       if(left){lab.style.left='auto';lab.style.right=`${(30+pad+a.p.ox).toFixed(1)}px`;}
       else{lab.style.right='auto';lab.style.left=`${(30+pad-a.p.ox).toFixed(1)}px`;}
-      a.n.classList.toggle('lbl',clear);
+      a.n.classList.toggle('lbl',!!use);
     });
-    if(clear)boxes.push(box);
+    if(use)boxes.push(use.box);
   });
   // towns: hidden under a place name only once you are in close
-  el('.towns').innerHTML=towns.filter(t=>!(MV.span<=CLOSE&&boxes.some(q=>hit(q,t.box)))).map(t=>
-    `<div class="town" style="transform:translate(${t.x.toFixed(1)}px,${t.y.toFixed(1)}px)"><span></span>${esc(t.nm)}</div>`).join('');
+  const TX={r:'',l:' translateX(-100%)',b:' translateX(-50%)',a:' translate(-50%,-100%)'};
+  el('.towns').innerHTML=towns.filter(t=>!t.hide&&!(MV.span<=CLOSE&&boxes.some(q=>hit(q,t.box)))).map(t=>{
+    const at=`translate(${t.x.toFixed(1)}px,${t.y.toFixed(1)}px)`;
+    return `<div class="tdot" style="transform:${at}"></div><div class="town ${t.v}" style="transform:${at}${TX[t.v]}">${esc(t.nm)}</div>`;}).join('');
   el('.mareas').querySelectorAll('.mbtn').forEach(b=>b.setAttribute('aria-pressed',b.dataset.area===area));
 }
 function zoomAt(px,py,factor){
