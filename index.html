@@ -65,7 +65,7 @@ h1 span{display:block;font-size:.82rem;font-weight:500;letter-spacing:.01em;opac
 #qclear{position:absolute;right:4px;top:50%;transform:translateY(-50%);width:36px;height:36px;color:#FFEAF0;opacity:.65}
 
 .tabs{display:flex;gap:4px;margin:12px 16px 0;background:var(--shell);padding:4px;border-radius:12px;border:1px solid var(--hair-soft)}
-.tabs button{flex:1;height:38px;border-radius:9px;font-weight:600;font-size:.9rem;color:var(--ink-soft)}
+.tabs button{flex:1 1 auto;padding:0 8px;white-space:nowrap;height:38px;border-radius:9px;font-weight:600;font-size:.9rem;color:var(--ink-soft)}
 .tabs button[aria-selected="true"]{background:var(--paper);color:var(--rose-deep);box-shadow:0 1px 2px rgba(116,29,40,.12)}
 
 .chips{display:flex;gap:7px;overflow-x:auto;padding:12px 16px 2px;scrollbar-width:none}
@@ -741,13 +741,13 @@ function mapShell(){
         <polygon points="${sea}" fill="#DCEBF0"/>
         <polyline points="${coast}" fill="none" stroke="#9FC4CE" stroke-width="2" vector-effect="non-scaling-stroke"/>
       </svg>
+      <div class="towns"></div>
       <div class="mkrs">${pts.map(p=>{const c=CATS[p.i.cat]||CATS.note;
         return `<div class="mkr${p.exact?'':' ap'}" role="button" tabindex="0" data-id="${p.i.id}"
           style="--c:${c.fg};--b:${c.bg}"><i>${c.em}</i><b>${esc(p.i.title)}</b></div>`;}).join('')}</div>
-      <div class="towns"></div>
       <div class="mzoom"><button data-z="in" aria-label="Zoom in">+</button><button data-z="out" aria-label="Zoom out">−</button></div>
     </div>
-    <p class="mnote">${pts.length} places shown${missing?` · ${missing} have no map position`:''}.
+    <p class="mnote">${pts.length} places shown${missing?` · ${missing} ${missing===1?'has':'have'} no map position`:''}.
       Pinch or use + to zoom; names appear as places spread out. A dashed ring means the spot is
       approximate — the street or the town rather than the door. The coast is traced through the
       beach pins, so treat it as indicative.</p>
@@ -769,21 +769,38 @@ function mapDraw(){
     const on=sx>-40&&sx<W+40&&sy>-40&&sy<H+40;
     n.hidden=!on; if(!on)return;
     n.style.transform=`translate(${sx.toFixed(1)}px,${sy.toFixed(1)}px)`;
-    shown.push({n,x:sx,y:sy});
+    shown.push({n,p,x:sx,y:sy,bx:x,by:y});
   });
-  // a name shows once nothing else is crowding it, or when you are right in close
-  shown.forEach(a=>{
-    const lab=a.n.querySelector('b'), lw=lab.offsetWidth+34;
-    const left=a.x+lw>W&&a.x-lw>0;                        // flip when it would run off the right
-    const lo=left?a.x-lw:a.x, hi=left?a.x:a.x+lw;
-    const clear=a.x>=0&&a.x<=W&&(MV.span<=0.02||
-      !shown.some(b=>b!==a&&b.x>lo-14&&b.x<hi+14&&Math.abs(b.y-a.y)<30&&!(b.x===a.x&&b.y===a.y)));
-    a.n.classList.toggle('lbl',clear); a.n.classList.toggle('lbl-l',clear&&left);
+  // Names. Places sharing one exact spot can never spread apart by zooming,
+  // so their names stack in a column beside the ring instead of piling up.
+  const CLOSE=0.1;   // closer than this, place names beat town names; wider, towns win
+  const towns=TOWNS.filter(([,,,rk])=>rk===1||MV.span<=0.36).map(([nm,la,lo])=>{
+    const [x,y]=px(lo,wy(la)); const tw=nm.length*6.8+16;
+    return {nm,x,y,box:[x-4,y-18,x-4+tw,y+4],on:x>-60&&x<W+60&&y>-20&&y<H+20};}).filter(t=>t.on);
+  const hit=(a,b)=>a[0]<b[2]&&a[2]>b[0]&&a[1]<b[3]&&a[3]>b[1];
+  const boxes=[], groups={};
+  shown.forEach(a=>{const k=a.p.la+','+a.p.lo;(groups[k]=groups[k]||[]).push(a);});
+  Object.values(groups).forEach(g=>{
+    const cnt=g.length, bx=g[0].bx, by=g[0].by, pad=cnt>1?13:0;
+    const lw=Math.max(...g.map(a=>a.n.querySelector('b').offsetWidth));
+    const left=bx+17+pad+lw>W&&bx-17-pad-lw>0;          // flip when it would run off the right
+    const xlo=left?bx-17-pad-lw:bx+17+pad, xhi=xlo+lw, ylo=by-cnt*11-4, yhi=by+cnt*11+4;
+    const box=[xlo,ylo,xhi,yhi];
+    const clear=bx>=0&&bx<=W&&(MV.span<=0.02||
+      !shown.some(o=>!g.includes(o)&&o.x>xlo-16&&o.x<xhi+16&&o.y>ylo-16&&o.y<yhi+16))
+      &&!(MV.span>CLOSE&&towns.some(t=>hit(t.box,box)));
+    g.forEach((a,k)=>{
+      const lab=a.n.querySelector('b');
+      lab.style.top=`calc(50% + ${((k-(cnt-1)/2)*22-a.p.oy).toFixed(1)}px)`;
+      if(left){lab.style.left='auto';lab.style.right=`${(30+pad+a.p.ox).toFixed(1)}px`;}
+      else{lab.style.right='auto';lab.style.left=`${(30+pad-a.p.ox).toFixed(1)}px`;}
+      a.n.classList.toggle('lbl',clear);
+    });
+    if(clear)boxes.push(box);
   });
-  // towns: the big ones always, the rest once you are closer in
-  el('.towns').innerHTML=TOWNS.filter(([,,,rk])=>rk===1||MV.span<=0.36).map(([nm,la,lo])=>{
-    const [x,y]=px(lo,wy(la)); if(x<-60||x>W+60||y<-20||y>H+20)return '';
-    return `<div class="town" style="transform:translate(${x.toFixed(1)}px,${y.toFixed(1)}px)"><span></span>${esc(nm)}</div>`;}).join('');
+  // towns: hidden under a place name only once you are in close
+  el('.towns').innerHTML=towns.filter(t=>!(MV.span<=CLOSE&&boxes.some(q=>hit(q,t.box)))).map(t=>
+    `<div class="town" style="transform:translate(${t.x.toFixed(1)}px,${t.y.toFixed(1)}px)"><span></span>${esc(t.nm)}</div>`).join('');
   el('.mareas').querySelectorAll('.mbtn').forEach(b=>b.setAttribute('aria-pressed',b.dataset.area===area));
 }
 function zoomAt(px,py,factor){
