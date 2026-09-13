@@ -1,7 +1,7 @@
 /* Coolum — offline service worker.
    Bump VERSION whenever the cached file list changes; the old cache is
    dropped on activate. */
-const VERSION = 'v1';
+const VERSION = 'v2';
 const CACHE = 'coolum-' + VERSION;
 
 const FONT_CSS = 'https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&display=swap';
