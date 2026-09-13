@@ -1,7 +1,7 @@
 /* Coolum — offline service worker.
    Bump VERSION whenever the cached file list changes; the old cache is
    dropped on activate. */
-const VERSION = 'v2';
+const VERSION = 'v3';
 const CACHE = 'coolum-' + VERSION;
 
 const FONT_CSS = 'https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&display=swap';
@@ -14,7 +14,18 @@ const PRECACHE = [
   './icons/icon-180-apple.png',
   './icons/icon-192.png',
   './icons/icon-512.png',
-  './icons/icon-512-maskable.png'
+  './icons/icon-512-maskable.png',
+  // photos, so the detail sheets still have them at the top of Mt Coolum
+  './img/b1.jpg',
+  './img/b5.jpg',
+  './img/k1.jpg',
+  './img/k3.jpg',
+  './img/k6.jpg',
+  './img/k7.jpg',
+  './img/p2.jpg',
+  './img/p5.jpg',
+  './img/s1.jpg',
+  './img/s4.jpg'
 ];
 
 const isFont = u => u.hostname === 'fonts.googleapis.com' || u.hostname === 'fonts.gstatic.com';

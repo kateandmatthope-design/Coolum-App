@@ -143,6 +143,10 @@ textarea.field{min-height:76px;resize:vertical}
 .btn.primary{background:var(--rose-deep);color:#fff}
 .btn.ghost{background:transparent;border:1.5px solid var(--hair);color:var(--ink-soft);flex:0 0 88px}
 .btn.danger{color:#8E2230;border:1.5px solid #F0C2CA;background:#FFF0F3;flex:0 0 56px}
+.dtl-photo{margin:0 0 14px}
+.dtl-photo img{display:block;width:100%;aspect-ratio:16/10;object-fit:cover;
+  border-radius:var(--r);background:var(--shell)}
+.dtl-photo figcaption{font-size:.68rem;color:var(--ink-soft);margin-top:5px;padding:0 2px}
 .dtl-note{background:var(--paper);border:1px solid var(--hair-soft);border-radius:var(--r);
   padding:15px 16px;font-size:.95rem;line-height:1.6;white-space:pre-wrap;margin-bottom:14px}
 .linkgrid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:6px}
@@ -220,10 +224,23 @@ const CATS={
   eat:{label:'Eat & drink',       bg:'#F3E2DE',fg:'#9E4E39'},
   trip:{label:'Day trips',        bg:'#EDE5DA',fg:'#865E2B'}
 };
+/* photo credits shown under each image; full source URLs in CREDITS.md */
+const PHOTO_BY={
+  k1:["albinfo","CC BY-SA 3.0"],
+  k3:["Vczhang","CC BY-SA 4.0"],
+  k6:["grumpylumixuser","CC BY 3.0"],
+  k7:["Andrii Slonchak from Brisbane, Australia","CC BY 2.0"],
+  s1:["DaHuzyBru","CC BY-SA 4.0"],
+  b1:["ASphericalBird","CC BY 4.0"],
+  b5:["Chris Olszewski","CC BY-SA 4.0"],
+  p2:["Kgbo","CC BY-SA 4.0"],
+  s4:["Kgbo","CC BY-SA 4.0"],
+  p5:["Kgbo","CC BY-SA 4.0"]
+};
 const ORDER=['note','tour','ride','wear','shop','walk','beach','eat','trip'];
 
 /* ---- seeded content ---- */
-const SEED_V=3;
+const SEED_V=4;
 const SEED=[
 /* ===== practical ===== */
 {id:'n1',cat:'note',must:1,day:'d1',title:'Monday — Brisbane to Coolum',
@@ -309,7 +326,7 @@ const SEED=[
  note:'Your own town — Birtwill Street and Beach Road. Surf shops, swimwear, a couple of small boutiques, the bakery and the IGA. All walkable from the park, which makes it the default when you cannot be bothered driving.'},
 
 /* ===== markets & browsing ===== */
-{id:'s1',cat:'shop',must:1,day:'d3',title:'Eumundi Markets',
+{id:'s1',cat:'shop',photo:'img/s1.jpg',must:1,day:'d3',title:'Eumundi Markets',
  place:'Original Eumundi Markets',
  url:'https://www.visitsunshinecoast.com/guide/sunshine-coast-markets',
  note:'Australia\u2019s biggest art and craft market — 300 to 500 stalls under heritage-listed fig trees in a hinterland town 23km inland.\n\nWednesday 8am–2pm and Saturday 7am–2pm. You can do both: Wednesday the 7th as a proper day out, Saturday the 10th on the way to the airport. Saturday is the bigger day of the two.\n\nParking is paid off Napier Drive with some limited free parking on Memorial Drive. Go early — by 11am on a Wednesday it is shoulder to shoulder.'},
@@ -319,7 +336,7 @@ const SEED=[
 {id:'s3',cat:'shop',day:'d6',title:'Yandina Markets',
  place:'Yandina Markets North Street Yandina',
  note:'Saturday only, from 6am. Vintage and retro fashion, pre-loved goods, trash and treasure, plants and produce — a completely different character to Eumundi.\n\nYandina is right on the highway between Eumundi and the airport, so on Saturday you could do both if you start early enough.'},
-{id:'s4',cat:'shop',title:'Montville',
+{id:'s4',cat:'shop',photo:'img/s4.jpg',title:'Montville',
  place:'Main Street Montville',
  note:'A hinterland village on the escarpment about an hour and ten from Coolum, built almost entirely around browsing — galleries, woodwork, glassblowing, leather, fudge and clocks. Unashamedly touristy but the craft quality is high.\n\nThe drive up through the ranges is half the point. Combine with Maleny rather than doing either alone.'},
 {id:'s5',cat:'shop',title:'Maleny',
@@ -336,13 +353,13 @@ const SEED=[
  note:'The full-size shopping centre at Maroochydore, 20 minutes south. Not the reason you came, but it is the wet-day backup and the place to replace anything you forgot to pack.'},
 
 /* ===== walks ===== */
-{id:'k1',cat:'walk',must:1,title:'Mount Coolum summit',
+{id:'k1',cat:'walk',photo:'img/k1.jpg',must:1,title:'Mount Coolum summit',
  place:'Mount Coolum National Park',
  note:'The one everybody does, and rightly. About 1.6km return but steep and rocky the entire way — a scramble in places rather than a path. Allow 45 to 60 minutes up, less down.\n\nThe reward is 360 degrees from Noosa in the north to Mooloolaba in the south, with the Glass House Mountains inland. There is no shade at all, so go at first light — sunrise is around 5.20am and the car park fills by 7.\n\nProper shoes, water, and take your time on the descent; that is where people come unstuck.'},
 {id:'k2',cat:'walk',must:1,title:'Coolum boardwalk and Point Perry',
  place:'Point Perry Lookout Coolum Beach',
  note:'Flat, easy and five minutes from your van. The boardwalk runs south along the dark volcanic rock of the headland to the Point Perry lookout.\n\nThis is the sunrise walk — east-facing, so the sun comes straight up out of the water. Also the best place in town to sit with a coffee and watch the surf without committing to anything.'},
-{id:'k3',cat:'walk',must:1,title:'Noosa National Park coastal track',
+{id:'k3',cat:'walk',photo:'img/k3.jpg',must:1,title:'Noosa National Park coastal track',
  place:'Noosa National Park Noosa Heads',
  note:'The best coastal walk on this stretch of the country. From the Noosa Heads entrance the track runs past Boiling Pot, Tea Tree Bay, Dolphin Point and Granite Bay to Hells Gates — about 5.4km return to Hells Gates, mostly easy, with a few rocky bits.\n\nKoalas are often in the trees around Tea Tree Bay; look for clusters of people staring upward. Alexandria Bay, further on, is clothing-optional and usually empty.\n\nParking at the entrance is a nightmare after 8am — park in Noosa and walk in, or take the shuttle.'},
 {id:'k4',cat:'walk',title:'Point Arkwright and Yaroomba',
@@ -351,15 +368,15 @@ const SEED=[
 {id:'k5',cat:'walk',title:'Stumers Creek to Marcoola',
  place:'Stumers Creek Coolum Beach',
  note:'North end of Coolum, where the creek meets the sea. A long flat beach walk with barely anyone on it, and an off-leash dog area if you want to say hello to other people\u2019s dogs.\n\nThe creek itself is worth the walk — it shifts with every tide and the light on it in the late afternoon is lovely.'},
-{id:'k6',cat:'walk',title:'Mary Cairncross Scenic Reserve',
+{id:'k6',cat:'walk',photo:'img/k6.jpg',title:'Mary Cairncross Scenic Reserve',
  place:'Mary Cairncross Scenic Reserve Maleny',
  note:'Fifty-five hectares of remnant subtropical rainforest near Maleny with a gentle 1.7km loop, plus a lookout lawn with the postcard view of the Glass House Mountains.\n\nSmall entry fee for the walk. Pair with Maleny\u2019s main street and you have a full hinterland day.'},
-{id:'k7',cat:'walk',title:'Kondalilla Falls',
+{id:'k7',cat:'walk',photo:'img/k7.jpg',title:'Kondalilla Falls',
  place:'Kondalilla Falls National Park',
  note:'Near Montville. The full circuit is 4.7km through rainforest and down to the base of a 90m waterfall, with a swimming hole at the top. It is steep coming back up — that is the whole difficulty of it.\n\nAbout an hour and fifteen from Coolum, so treat it as the anchor of a hinterland day rather than an add-on.'},
 
 /* ===== beaches ===== */
-{id:'b1',cat:'beach',title:'Coolum main beach',
+{id:'b1',cat:'beach',photo:'img/b1.jpg',title:'Coolum main beach',
  place:'Coolum Beach Surf Life Saving Club',
  note:'Patrolled in front of the surf club, which is next door to the park. Swim between the flags — there are rips here, and on a solo trip that matters more than usual.\n\nThe October water is around 22–23°C, warm enough without a wetsuit for most people.'},
 {id:'b2',cat:'beach',title:'Stumers Creek beach',
@@ -371,7 +388,7 @@ const SEED=[
 {id:'b4',cat:'beach',title:'Sunshine Beach',
  place:'Sunshine Beach Queensland',
  note:'The quieter side of Noosa, with better surf than Noosa Main and a proper beach feel. Patrolled. The surf club sits up on the hill with a view worth timing for late afternoon.'},
-{id:'b5',cat:'beach',title:'Noosa Main Beach',
+{id:'b5',cat:'beach',photo:'img/b5.jpg',title:'Noosa Main Beach',
  place:'Noosa Main Beach',
  note:'One of the very few north-facing beaches on the east coast, which is why it is so calm — genuinely a swimming beach rather than a surf beach. Busy, but the water is glassy and the longboarders at First Point are worth watching.'},
 
@@ -402,7 +419,7 @@ const SEED=[
 {id:'p1',cat:'trip',title:'Noosa',
  place:'Noosa Heads Queensland',
  note:'Twenty-five minutes north and the obvious big day out: Hastings Street for shops, Main Beach for a calm swim, the national park coastal walk, Noosa Junction for the better browsing, and Sunshine Beach on the far side.\n\nRealistically two separate days if you want to do it properly. Parking is the only real difficulty — go early or use the shuttle.'},
-{id:'p2',cat:'trip',title:'Mooloolaba',
+{id:'p2',cat:'trip',photo:'img/p2.jpg',title:'Mooloolaba',
  place:'Mooloolaba Esplanade',
  note:'Thirty minutes south. The Esplanade, a patrolled beach, the walk out to the Spit, SEA LIFE aquarium, and The Wharf where the whale-watching boats leave from.\n\nMore built up than Coolum and busier, but the beach is genuinely good and it pairs with a whale trip.'},
 {id:'p3',cat:'trip',title:'The hinterland loop',
@@ -411,7 +428,7 @@ const SEED=[
 {id:'p4',cat:'trip',title:'Australia Zoo',
  place:'Australia Zoo Beerwah',
  note:'An hour south at Beerwah. A full day and not cheap, but it is genuinely well run and the conservation work is real. Transfers from Coolum exist if you would rather not drive.'},
-{id:'p5',cat:'trip',title:'The Ginger Factory, Yandina',
+{id:'p5',cat:'trip',photo:'img/p5.jpg',title:'The Ginger Factory, Yandina',
  place:'The Ginger Factory Yandina',
  note:'Twenty minutes inland. Unapologetically a tourist attraction — train ride, factory tour, ginger everything — but the shop is good for presents and it is five minutes from Eumundi, so it fits onto a market morning.'}
 ];
@@ -552,7 +569,11 @@ function detail(id){
   const maps=`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(term)}`;
   const pics=`https://www.google.com/search?tbm=isch&q=${encodeURIComponent(term)}`;
   const web=`https://www.google.com/search?q=${encodeURIComponent(term+' Sunshine Coast')}`;
+  const by=PHOTO_BY[i.id];
+  const photo=i.photo?`<figure class="dtl-photo"><img src="${esc(i.photo)}" alt="">`+
+    (by?`<figcaption>${esc(by[0])} · ${esc(by[1])}</figcaption>`:'')+`</figure>`:'';
   openSheet(`
+    ${photo}
     <h3>${esc(i.title)}</h3>
     <div class="meta" style="margin:-6px 0 14px">
       <span class="pill cat" style="--catbg:${c.bg};--catfg:${c.fg}">${c.label}</span>
