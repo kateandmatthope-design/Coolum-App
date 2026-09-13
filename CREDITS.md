@@ -103,6 +103,9 @@ and in full below.
 | `p3` | `img/p3.jpg` | Alandean88 | CC BY-SA 4.0 | [Glass House Mountains, Queensland, Australia.jpg](https://commons.wikimedia.org/wiki/File:Glass_House_Mountains,_Queensland,_Australia.jpg) |
 | `p3` | `img/p3-2.jpg` | Cynthia O'Gorman | CC BY 4.0 | [On Mount Tibrogargan, Glass House Mountains, Queensland QUT-7166-2.jpg](https://commons.wikimedia.org/wiki/File:On_Mount_Tibrogargan,_Glass_House_Mountains,_Queensland_QUT-7166-2.jpg) |
 | `p3` | `img/p3-3.jpg` | Cynthia O'Gorman | CC BY 4.0 | [Mount Tibrogargan, Glass House Mountains, Queensland QUT-7166-1.jpg](https://commons.wikimedia.org/wiki/File:Mount_Tibrogargan,_Glass_House_Mountains,_Queensland_QUT-7166-1.jpg) |
+| `f1` | `img/f1.jpg` | Kgbo | CC BY-SA 3.0 | [Skyway at Brisbane Airport Domestic Terminal 03.jpg](https://commons.wikimedia.org/wiki/File:Skyway_at_Brisbane_Airport_Domestic_Terminal_03.jpg) |
+| `f1` | `img/f1-2.jpg` | DaHuzyBru | CC BY-SA 4.0 | [Brisbane Airport Domestic Terminal new security screening entry point, Jan 2026.jpg](https://commons.wikimedia.org/wiki/File:Brisbane_Airport_Domestic_Terminal_new_security_screening_entry_point,_Jan_2026.jpg) |
+| `f1` | `img/f1-3.jpg` | Kgbo | CC BY-SA 4.0 | [Skyway at Brisbane Airport Domestic Terminal, 2023.jpg](https://commons.wikimedia.org/wiki/File:Skyway_at_Brisbane_Airport_Domestic_Terminal,_2023.jpg) |
 
 ## Licence terms
 

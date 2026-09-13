@@ -1,7 +1,7 @@
 /* Coolum — offline service worker.
    Bump VERSION whenever the cached file list changes; the old cache is
    dropped on activate. */
-const VERSION = 'v5';
+const VERSION = 'v6';
 const CACHE = 'coolum-' + VERSION;
 
 const FONT_CSS = 'https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&display=swap';
@@ -29,6 +29,9 @@ const PRECACHE = [
   './img/b5-3.jpg',
   './img/b5-4.jpg',
   './img/b5.jpg',
+  './img/f1-2.jpg',
+  './img/f1-3.jpg',
+  './img/f1.jpg',
   './img/k1-2.jpg',
   './img/k1-3.jpg',
   './img/k1-4.jpg',
@@ -112,6 +115,7 @@ const PRECACHE = [
   './img/t/b3.jpg',
   './img/t/b4.jpg',
   './img/t/b5.jpg',
+  './img/t/f1.jpg',
   './img/t/k1.jpg',
   './img/t/k3.jpg',
   './img/t/k4.jpg',
