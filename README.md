@@ -37,7 +37,9 @@ overlay you can dismiss rather than throwing you out to Safari.
 | `manifest.json` | Makes it installable: name, colours, icons, standalone display |
 | `sw.js` | Service worker. Caches the page, icons and fonts for offline use |
 | `icons/` | App icons, generated from the app's own palette |
-| `img/` | Place photos, stored locally rather than hotlinked |
+| `img/` | Place photos, stored locally rather than hotlinked. `<id>.jpg` is the
+one on the detail sheet; `<id>-2.jpg` onwards are the gallery; `img/t/` holds the
+small list thumbnails |
 | `CREDITS.md` | Photographer, licence and source URL for every photo |
 
 ## Notes for later changes

@@ -90,7 +90,7 @@ main{padding:4px 16px 0}
 .tick{flex:none;width:23px;height:23px;margin-top:1px;border-radius:7px;border:2px solid var(--hair);
   background:var(--paper);display:flex;align-items:center;justify-content:center;color:transparent;font-size:.8rem;font-weight:800}
 .row.is-done .tick{background:var(--rose);border-color:var(--rose);color:var(--on-rose)}
-.body{flex:1;min-width:0}
+.body{flex:1;min-width:0;text-align:left}
 .title{font-weight:600;letter-spacing:-.005em;display:block}
 .title .star{color:var(--ochre);margin-left:5px}
 .note{font-size:.84rem;color:var(--ink-soft);margin-top:2px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
@@ -99,6 +99,8 @@ main{padding:4px 16px 0}
   background:var(--shell);color:var(--ink-soft);border:1px solid var(--hair-soft)}
 .pill.cat{background:var(--catbg);color:var(--catfg);border-color:transparent}
 .pill.book{background:var(--ochre-soft);color:var(--on-ochre-soft);border-color:transparent}
+.rowthumb{flex:none;align-self:center;width:54px;height:54px;border-radius:10px;
+  object-fit:cover;background:var(--shell)}
 .chev{flex:none;align-self:center;color:var(--hair);font-size:1.15rem}
 .empty{background:var(--paper);border:1px dashed var(--hair);border-radius:var(--r);padding:26px 20px;text-align:center;margin-top:14px}
 .empty p{margin:0 0 14px;color:var(--ink-soft);font-size:.92rem}
@@ -144,16 +146,23 @@ textarea.field{min-height:76px;resize:vertical}
 .btn.ghost{background:transparent;border:1.5px solid var(--hair);color:var(--ink-soft);flex:0 0 88px}
 .btn.danger{color:#8E2230;border:1.5px solid #F0C2CA;background:#FFF0F3;flex:0 0 56px}
 .dtl-photo{margin:0 0 14px}
+.photowrap{display:block;position:relative;width:100%;padding:0}
 .dtl-photo img{display:block;width:100%;aspect-ratio:16/10;object-fit:cover;
   border-radius:var(--r);background:var(--shell)}
 .dtl-photo figcaption{font-size:.68rem;color:var(--ink-soft);margin-top:5px;padding:0 2px}
+.photocount{position:absolute;right:9px;bottom:9px;background:rgba(79,20,27,.74);color:#fff;
+  font-size:.66rem;font-weight:700;letter-spacing:.02em;padding:4px 9px;border-radius:999px}
+.galsub{font-size:.8rem;color:var(--ink-soft);margin:-8px 0 15px}
+.galshot{margin:0 0 16px}
+.galshot img{display:block;width:100%;border-radius:var(--r);background:var(--shell)}
+.galshot figcaption{font-size:.68rem;color:var(--ink-soft);margin-top:5px;padding:0 2px}
 .dtl-note{background:var(--paper);border:1px solid var(--hair-soft);border-radius:var(--r);
   padding:15px 16px;font-size:.95rem;line-height:1.6;white-space:pre-wrap;margin-bottom:14px}
 .linkgrid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:6px}
-.linkgrid a{height:48px;border-radius:12px;background:var(--paper);border:1.5px solid var(--hair);
+.linkgrid a,.linkgrid button{height:48px;border-radius:12px;background:var(--paper);border:1.5px solid var(--hair);
   display:flex;align-items:center;justify-content:center;gap:7px;font-weight:600;font-size:.88rem;
   text-decoration:none;color:var(--rose-deep)}
-.linkgrid a.wide{grid-column:1/-1}
+.linkgrid a.wide,.linkgrid button.wide{grid-column:1/-1}
 footer{padding:28px 16px 8px;text-align:center}
 footer button{font-size:.8rem;color:var(--ink-soft);text-decoration:underline;text-underline-offset:3px;padding:8px 10px}
 .toast{position:fixed;left:50%;bottom:calc(86px + var(--safe-b));transform:translate(-50%,14px);
@@ -224,44 +233,44 @@ const CATS={
   eat:{label:'Eat & drink',       bg:'#F3E2DE',fg:'#9E4E39'},
   trip:{label:'Day trips',        bg:'#EDE5DA',fg:'#865E2B'}
 };
-/* photo credits shown under each image; full source URLs in CREDITS.md */
-const PHOTO_BY={
-  k1:["albinfo","CC BY-SA 3.0"],
-  k3:["Vczhang","CC BY-SA 4.0"],
-  k6:["grumpylumixuser","CC BY 3.0"],
-  k7:["Andrii Slonchak from Brisbane, Australia","CC BY 2.0"],
-  s1:["DaHuzyBru","CC BY-SA 4.0"],
-  b1:["ASphericalBird","CC BY 4.0"],
-  b5:["Chris Olszewski","CC BY-SA 4.0"],
-  p2:["Kgbo","CC BY-SA 4.0"],
-  s4:["Kgbo","CC BY-SA 4.0"],
-  p5:["Kgbo","CC BY-SA 4.0"],
-  n1:["Chris Olszewski","CC BY-SA 4.0"],
-  t1:["-wuppertaler","CC BY 4.0"],
-  t2:["Mark Gillow","CC BY 2.0"],
-  t5:["Jfnjfnrjfnjfa","CC BY-SA 4.0"],
-  t8:["Kgbo","CC BY-SA 4.0"],
-  r2:["Kgbo","CC BY-SA 4.0"],
-  r4:["Kgbo","CC BY-SA 4.0"],
-  w1:["Kgbo","CC BY-SA 4.0"],
-  w3:["ASphericalBird","CC BY 4.0"],
-  w4:["Kgbo","CC BY-SA 4.0"],
-  w5:["DaHuzyBru","CC BY-SA 4.0"],
-  s2:["Jack Bain","CC BY 4.0"],
-  s3:["Andy Hay","CC BY 2.0"],
-  s5:["Kgbo","CC BY-SA 4.0"],
-  s7:["Kgbo","CC BY-SA 4.0"],
-  s8:["Kgbo","CC BY-SA 4.0"],
-  k4:["zpunout","CC BY-SA 3.0"],
-  b3:["ASphericalBird","CC BY 4.0"],
-  b4:["Bjarte K. Fr\u00f8nsdal","CC BY-SA 4.0"],
-  p1:["Kgbo","CC BY-SA 4.0"],
-  p3:["Alandean88","CC BY-SA 4.0"]
+/* photos per item, hero first: [src, photographer, licence].
+   Full source URLs live in CREDITS.md. */
+const PHOTOS={
+  k1:[["img/k1.jpg", "albinfo", "CC BY-SA 3.0"],["img/k1-2.jpg", "Cynthia O'Gorman", "CC BY 4.0"],["img/k1-3.jpg", "albinfo", "CC BY-SA 3.0"],["img/k1-4.jpg", "Kgbo", "CC BY-SA 4.0"]],
+  k3:[["img/k3.jpg", "Vczhang", "CC BY-SA 4.0"],["img/k3-2.jpg", "Vczhang", "CC BY-SA 4.0"],["img/k3-3.jpg", "Yulanlu97", "CC BY-SA 4.0"],["img/k3-4.jpg", "Anneyla attirum darra", "CC BY-SA 4.0"]],
+  k6:[["img/k6.jpg", "grumpylumixuser", "CC BY 3.0"],["img/k6-2.jpg", "grumpylumixuser", "CC BY 3.0"],["img/k6-3.jpg", "grumpylumixuser", "CC BY 3.0"]],
+  k7:[["img/k7.jpg", "Andrii Slonchak from Brisbane, Australia", "CC BY 2.0"],["img/k7-2.jpg", "Tatters \u273e from Brisbane, Australia", "CC BY-SA 2.0"],["img/k7-3.jpg", "Damien Dempsey from Melbourne, Australia", "CC BY 2.0"],["img/k7-4.jpg", "Andrii Slonchak from Brisbane, Australia", "CC BY 2.0"]],
+  s1:[["img/s1.jpg", "DaHuzyBru", "CC BY-SA 4.0"],["img/s1-2.jpg", "No machine-readable author provided. Arnzy assumed (based on copyright claims).", "Public domain"],["img/s1-3.jpg", "DaHuzyBru", "CC BY-SA 4.0"]],
+  b1:[["img/b1.jpg", "ASphericalBird", "CC BY 4.0"],["img/b1-2.jpg", "zpunout", "CC BY-SA 3.0"],["img/b1-3.jpg", "ASphericalBird", "CC BY 4.0"],["img/b1-4.jpg", "Michal Hope", "CC BY-SA 3.0"]],
+  b5:[["img/b5.jpg", "Chris Olszewski", "CC BY-SA 4.0"],["img/b5-2.jpg", "Kgbo", "CC BY-SA 3.0"],["img/b5-3.jpg", "StormcrowMithrandir", "CC BY-SA 4.0"],["img/b5-4.jpg", "PeanutButterWalrus", "CC BY-SA 4.0"]],
+  p2:[["img/p2.jpg", "Kgbo", "CC BY-SA 4.0"],["img/p2-2.jpg", "Kgbo", "CC BY-SA 4.0"],["img/p2-3.jpg", "Steph McGlenchy", "CC BY 2.0"],["img/p2-4.jpg", "Chris Olszewski", "CC BY-SA 4.0"]],
+  s4:[["img/s4.jpg", "Kgbo", "CC BY-SA 4.0"],["img/s4-2.jpg", "Kgbo", "CC BY-SA 4.0"],["img/s4-3.jpg", "Kgbo", "CC BY-SA 4.0"],["img/s4-4.jpg", "Kgbo", "CC BY-SA 4.0"]],
+  p5:[["img/p5.jpg", "Kgbo", "CC BY-SA 4.0"],["img/p5-2.jpg", "Kgbo", "CC BY-SA 4.0"],["img/p5-3.jpg", "Kgbo", "CC BY-SA 4.0"],["img/p5-4.jpg", "Kgbo", "CC BY-SA 4.0"]],
+  n1:[["img/n1.jpg", "Chris Olszewski", "CC BY-SA 4.0"],["img/n1-2.jpg", "Kgbo", "CC BY-SA 3.0"],["img/n1-3.jpg", "Kgbo", "CC BY-SA 4.0"]],
+  t1:[["img/t1.jpg", "-wuppertaler", "CC BY 4.0"],["img/t1-2.jpg", "DaHuzyBru", "CC BY-SA 4.0"]],
+  t2:[["img/t2.jpg", "Mark Gillow", "CC BY 2.0"],["img/t2-2.jpg", "Bernard Spragg. NZ from Christchurch, New Zealand", "CC0"]],
+  t8:[["img/t8.jpg", "Kgbo", "CC BY-SA 4.0"],["img/t8-2.jpg", "SonAlli", "CC BY-SA 4.0"],["img/t8-3.jpg", "GameBoy2936", "CC BY-SA 4.0"],["img/t8-4.jpg", "Kgbo", "CC BY-SA 4.0"]],
+  r2:[["img/r2.jpg", "Kgbo", "CC BY-SA 4.0"],["img/r2-2.jpg", "Kgbo", "CC BY-SA 4.0"],["img/r2-3.jpg", "Kgbo", "CC BY-SA 4.0"],["img/r2-4.jpg", "Kgbo", "CC BY-SA 4.0"]],
+  r4:[["img/r4.jpg", "Kgbo", "CC BY-SA 4.0"],["img/r4-2.jpg", "Kgbo", "CC BY-SA 4.0"],["img/r4-3.jpg", "Chris Olszewski", "CC BY-SA 4.0"]],
+  w1:[["img/w1.jpg", "Kgbo", "CC BY-SA 4.0"],["img/w1-2.jpg", "Kgbo", "CC BY-SA 4.0"],["img/w1-3.jpg", "Kgbo", "CC BY-SA 4.0"],["img/w1-4.jpg", "Kgbo", "CC BY-SA 4.0"]],
+  w3:[["img/w3.jpg", "ASphericalBird", "CC BY 4.0"],["img/w3-2.jpg", "ASphericalBird", "CC BY 4.0"]],
+  w4:[["img/w4.jpg", "Kgbo", "CC BY-SA 4.0"],["img/w4-2.jpg", "Kgbo", "CC BY-SA 4.0"]],
+  w5:[["img/w5.jpg", "DaHuzyBru", "CC BY-SA 4.0"],["img/w5-2.jpg", "DaHuzyBru", "CC BY-SA 4.0"],["img/w5-3.jpg", "No machine-readable author provided. Arnzy assumed (based on copyright claims).", "Public domain"]],
+  s2:[["img/s2.jpg", "Jack Bain", "CC BY 4.0"],["img/s2-2.jpg", "Mattinbgn", "CC BY-SA 3.0"]],
+  s3:[["img/s3.jpg", "Andy Hay", "CC BY 2.0"]],
+  s5:[["img/s5.jpg", "Kgbo", "CC BY-SA 4.0"],["img/s5-2.jpg", "Kgbo", "CC BY-SA 4.0"],["img/s5-3.jpg", "Kgbo", "CC BY-SA 4.0"]],
+  s7:[["img/s7.jpg", "Kgbo", "CC BY-SA 4.0"],["img/s7-2.jpg", "Kgbo", "CC BY-SA 4.0"],["img/s7-3.jpg", "Chris Olszewski", "CC BY-SA 4.0"],["img/s7-4.jpg", "Kgbo", "CC BY-SA 4.0"]],
+  s8:[["img/s8.jpg", "Kgbo", "CC BY-SA 4.0"],["img/s8-2.jpg", "Kgbo", "CC BY-SA 4.0"]],
+  k4:[["img/k4.jpg", "zpunout", "CC BY-SA 3.0"]],
+  b3:[["img/b3.jpg", "ASphericalBird", "CC BY 4.0"],["img/b3-2.jpg", "Flickr user: Mountain/ \\Ash", "CC BY 2.0"]],
+  b4:[["img/b4.jpg", "Bjarte K. Fr\u00f8nsdal", "CC BY-SA 4.0"],["img/b4-2.jpg", "Kgbo", "CC BY-SA 4.0"],["img/b4-3.jpg", "Kgbo", "CC BY-SA 4.0"]],
+  p1:[["img/p1.jpg", "Kgbo", "CC BY-SA 4.0"],["img/p1-2.jpg", "Kgbo", "CC BY-SA 4.0"],["img/p1-3.jpg", "Kgbo", "CC BY-SA 4.0"],["img/p1-4.jpg", "Kgbo", "CC BY-SA 4.0"]],
+  p3:[["img/p3.jpg", "Alandean88", "CC BY-SA 4.0"],["img/p3-2.jpg", "Cynthia O'Gorman", "CC BY 4.0"],["img/p3-3.jpg", "Cynthia O'Gorman", "CC BY 4.0"]]
 };
 const ORDER=['note','tour','ride','wear','shop','walk','beach','eat','trip'];
 
 /* ---- seeded content ---- */
-const SEED_V=6;
+const SEED_V=7;
 const SEED=[
 /* ===== practical ===== */
 {id:'n1',cat:'note',photo:'img/n1.jpg',must:1,day:'d1',title:'Monday — Brisbane to Coolum',
@@ -293,13 +302,6 @@ const SEED=[
 {id:'t3',cat:'tour',book:1,title:'Everglades kayak, southern end',
  place:'Noosa Everglades kayak tour',
  note:'The cheaper, more active alternative to the cruise — around two and a half hours paddling the southern end, looking for stingrays and birdlife. Suits a solo traveller better than a boat full of couples, and you are back by lunchtime.\n\nChecked 13 Sep 2026\nKanu Kapers is the established everglades kayak operator — half day, one, two and three day trips, guided or self-guided, launching from Boreen Point at the northern end.\n\nThey do not publish prices anywhere on their site, so you will need to ring 07 5485 3328.\n\nI could not confirm the two-and-a-half-hour southern-end paddle described above from any operator\'s own site — worth checking that detail when you ring.'},
-{id:'t4',cat:'tour',book:1,title:'Beginner surf lesson, Coolum Beach',
- place:'surf lessons Coolum Beach',
- url:'https://www.bookme.com.au/things-to-do/noosa-mooloolaba-sunshine-coast/activity/2hr-beginner-surf-lesson-coolum-beach/7506',
- note:'Two hours on your own doorstep — Coolum has gentle, consistent beach breaks and lessons run right in front of town, so no driving. Boards and wetsuits included.\n\nA good one for a solo trip: you are in a group, someone is watching the water for you, and it fills a morning without commitment.\n\nChecked 13 Sep 2026\nCoolum Surf School meets at their trailer in Tickle Park, a few minutes\' walk from the holiday park, so no driving. Phone 0438 731 503.\n\nTwo things worth knowing before you book. Their own site describes the beginner group lesson as 1 hour 15 minutes, not the two hours the Bookme listing claims. And if you are the only person booked on a group class they may shorten it to an hour, or move you to another time or day — which is a real risk travelling alone, so ring rather than booking blind.\n\nPrices are not published on their site, and the Bookme link on this card blocks automated access so I could not check it is still live. Rescheduling needs 24 hours\' notice.'},
-{id:'t5',cat:'tour',photo:'img/t5.jpg',book:1,title:'Double Island Point surf safari',
- place:'Double Island Point Queensland',
- note:'Full day from Noosa: 4WD up the beach through the Great Sandy National Park, then surf what is often called Australia\u2019s longest wave — rides can run for over a kilometre on a good day. Some operators run a kayak version instead, looking for dolphins and turtles.\n\nBig day, early start, and it books out. Worth it if you only do one paid thing all week.\n\nChecked 13 Sep 2026\nEpic Ocean Adventures run these out of Noosa. Their booking page lists six-hour trips from about A$162, the dolphin kayak and 4WD beach day from A$172, and the whale-watching kayak version from A$176. A private surf lesson day trip is A$450.\n\nThe whale version is seasonal on the same June-to-October window as the Mooloolaba boats, so early October is near the end of it.'},
 {id:'t6',cat:'tour',book:1,title:'Hinterland day tour',
  place:'Sunshine Coast hinterland day tour',
  note:'Small-group tours cover Maleny, Montville, the Glass House Mountains lookouts and usually a distillery or cheese stop. The case for taking one rather than driving yourself: the hinterland roads are winding, the villages are all tasting-based, and you cannot do both.\n\nMost pick up from Coolum accommodation.\n\nChecked 13 Sep 2026\nJoel\'s Journeys is one operator that picks up from Coolum Beach, at about 8.40am, for roughly an eight-hour day taking in Maleny, Montville, Mary Cairncross and a two-course lunch at Secrets on the Lake. Shared tours run Wednesday to Sunday and need a minimum of three adults.\n\nTheir site blocks automated access, so I could not confirm the price or that the Coolum pick-up still stands — worth a phone call first.\n\nWednesday is your Eumundi day, so Thursday or Friday is the natural fit for this.'},
@@ -537,6 +539,7 @@ function rowHTML(i){
         ${i.day&&view==='ideas'?`<span class="pill">${DAYS.find(d=>d.id===i.day).label}</span>`:''}
       </span>
     </button>
+    ${i.photo?`<img class="rowthumb" src="img/t/${i.id}.jpg" alt="" loading="lazy" decoding="async" data-open="${i.id}">`:''}
     <span class="chev">›</span>
   </div>`;
 }
@@ -588,11 +591,15 @@ function detail(id){
   const c=CATS[i.cat]||CATS.note;
   const term=i.place||i.title;
   const maps=`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(term)}`;
-  const pics=`https://www.google.com/search?tbm=isch&q=${encodeURIComponent(term)}`;
   const web=`https://www.google.com/search?q=${encodeURIComponent(term+' Sunshine Coast')}`;
-  const by=PHOTO_BY[i.id];
-  const photo=i.photo?`<figure class="dtl-photo"><img src="${esc(i.photo)}" alt="">`+
-    (by?`<figcaption>${esc(by[0])} · ${esc(by[1])}</figcaption>`:'')+`</figure>`:'';
+  const ph=PHOTOS[i.id]||[];
+  const photo=ph.length?`<figure class="dtl-photo">
+      <button class="photowrap" data-gal="${i.id}" aria-label="See all photos">
+        <img src="${esc(ph[0][0])}" alt="">
+        ${ph.length>1?`<span class="photocount">${ph.length} photos</span>`:''}
+      </button>
+      <figcaption>${esc(ph[0][1])} · ${esc(ph[0][2])}</figcaption>
+    </figure>`:'';
   openSheet(`
     ${photo}
     <h3>${esc(i.title)}</h3>
@@ -605,8 +612,9 @@ function detail(id){
     ${i.note?`<div class="dtl-note">${esc(i.note)}</div>`:''}
     <div class="linkgrid">
       ${i.url?`<a class="wide" href="${esc(i.url)}" ${LT}>Official page</a>`:''}
-      <a href="${maps}" ${LT}>Maps</a>
-      <a href="${pics}" ${LT}>Photos</a>
+      ${ph.length?`<a href="${maps}" ${LT}>Maps</a>
+      <button data-gal="${i.id}">Photos</button>`
+      :`<a class="wide" href="${maps}" ${LT}>Maps</a>`}
       <a class="wide" href="${web}" ${LT}>Read more</a>
     </div>
     <label>Which day?</label>
@@ -622,6 +630,18 @@ function detail(id){
     const b=e.target.closest('button'); if(!b)return;
     i.day=b.dataset.d||null; save(); detail(id); render();
   };
+}
+function gallery(id){
+  const i=S.items.find(x=>x.id===id); if(!i)return;
+  const ph=PHOTOS[id]||[]; if(!ph.length)return detail(id);
+  openSheet(`
+    <h3>${esc(i.title)}</h3>
+    <p class="galsub">${ph.length} photo${ph.length===1?'':'s'} from Wikimedia Commons</p>
+    ${ph.map(p=>`<figure class="galshot">
+        <img src="${esc(p[0])}" alt="" loading="lazy" decoding="async">
+        <figcaption>${esc(p[1])} · ${esc(p[2])}</figcaption>
+      </figure>`).join('')}
+    <div class="actions"><button class="btn primary" data-open="${i.id}">Back</button></div>`);
 }
 function editor(id){
   const i=id?S.items.find(x=>x.id===id):{cat:'walk',must:0};
@@ -676,6 +696,7 @@ document.addEventListener('click',e=>{
   if(t){const i=S.items.find(x=>x.id===t.dataset.tick);i.done=i.done?0:1;save();render();return;}
   const o=e.target.closest('[data-open]');
   if(o){o.dataset.open==='new'?editor(null):detail(o.dataset.open);return;}
+  const g=e.target.closest('[data-gal]'); if(g){gallery(g.dataset.gal);return;}
   const ed=e.target.closest('[data-edit]'); if(ed){editor(ed.dataset.edit);return;}
   const dn=e.target.closest('[data-done]');
   if(dn){const i=S.items.find(x=>x.id===dn.dataset.done);i.done=i.done?0:1;save();closeSheet();render();}
