@@ -111,10 +111,27 @@ main{padding:4px 16px 0}
 .mbtn{flex:none;height:34px;padding:0 13px;border-radius:999px;border:1.5px solid var(--hair);
   background:var(--paper);font-size:.85rem;font-weight:600;color:var(--ink-soft);white-space:nowrap}
 .mbtn[aria-pressed="true"]{background:var(--rose);border-color:var(--rose);color:var(--on-rose)}
-.map{width:100%;height:auto;display:block;border-radius:var(--r);border:1px solid var(--hair-soft);background:#FFF6F2}
-.map .mt{font-size:31px;font-weight:700;fill:#6B4750;paint-order:stroke;stroke:#FFF6F2;stroke-width:7px;pointer-events:none}
-.map .me{font-size:31px;text-anchor:middle;dominant-baseline:central;pointer-events:none}
-.map .mk{cursor:pointer}
+.mapstage{position:relative;height:58vh;min-height:340px;max-height:640px;border-radius:var(--r);
+  border:1px solid var(--hair-soft);background:#FFF6F2;overflow:hidden;touch-action:none;
+  -webkit-user-select:none;user-select:none;cursor:grab}
+.mapstage svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.towns,.mkrs{position:absolute;inset:0;pointer-events:none}
+.town{position:absolute;left:0;top:0;margin:-9px 0 0 -4px;white-space:nowrap;font-size:.7rem;font-weight:700;
+  color:#6B4750;letter-spacing:.02em;padding:1px 6px 1px 3px;border-radius:999px;background:rgba(255,246,242,.78)}
+.town span{display:inline-block;width:7px;height:7px;border-radius:50%;background:#8B5F68;margin-right:4px;vertical-align:middle}
+.mkr{position:absolute;left:0;top:0;width:26px;height:26px;margin:-13px 0 0 -13px;pointer-events:auto;cursor:pointer}
+.mkr i{display:flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;
+  border:2px solid var(--c);background:var(--b);font-style:normal;font-size:14px;line-height:1;
+  box-shadow:0 1px 3px rgba(79,20,27,.25)}
+.mkr.ap i{border-style:dashed}
+.mkr b{position:absolute;left:30px;top:50%;transform:translateY(-50%);white-space:nowrap;visibility:hidden;
+  font-size:.74rem;font-weight:700;color:var(--ink);background:rgba(255,246,242,.9);padding:2px 6px;border-radius:6px;
+  box-shadow:0 1px 2px rgba(79,20,27,.12);pointer-events:none;max-width:230px;overflow:hidden;text-overflow:ellipsis}
+.mkr.lbl b{visibility:visible}
+.mkr.lbl-l b{left:auto;right:30px}
+.mzoom{position:absolute;left:10px;bottom:10px;display:flex;flex-direction:column;gap:6px}
+.mzoom button{width:40px;height:40px;border-radius:10px;background:var(--paper);border:1.5px solid var(--hair);
+  font-size:1.35rem;font-weight:700;color:var(--rose-deep);box-shadow:0 2px 6px rgba(79,20,27,.18)}
 .mnote{font-size:.72rem;color:var(--ink-soft);margin:9px 2px 0;line-height:1.45}
 .legend{display:flex;flex-wrap:wrap;gap:7px 11px;margin:11px 2px 0}
 .lg{display:flex;align-items:center;gap:5px;font-size:.72rem;font-weight:600;color:var(--ink-soft)}
@@ -624,12 +641,7 @@ function rowHTML(i){
 }
 function render(){
   const list=filtered(), m=el('#main'); let h='';
-  if(view==='map'){
-    m.innerHTML=mapHTML();
-    el('.mareas').onclick=e=>{const b=e.target.closest('[data-area]');
-      if(b){area=b.dataset.area;render();}};
-    return;
-  }
+  if(view==='map'){ m.innerHTML=mapShell(); mapMount(); return; }
   if(view==='ideas'){
     if(!list.length){
       h=`<div class="empty"><p>${query?'Nothing matches that.':'Nothing here yet.'}</p><button class="btn primary" data-open="new" style="max-width:200px;margin:0 auto">Add an idea</button></div>`;
@@ -657,12 +669,14 @@ function render(){
 }
 
 /* ---- map ----
-   Drawn as plain SVG rather than tiles, so it works with no signal like the
-   rest of the app. Positions are real, projected Web Mercator. The coastline
-   is traced through the coastal pins themselves, so it is indicative rather
-   than surveyed - accurate enough to see where things sit relative to it. */
+   Land and sea are SVG; the markers and labels are HTML laid over the top, so
+   they keep a constant size on screen while the ground scales under them.
+   Pinch to zoom, drag to pan, double-tap to zoom in. No tiles and no library,
+   so it works with no signal like everything else. Positions are real, Web
+   Mercator; the coast is traced through the beach pins, so it is indicative. */
 let area='coast';
-const AREAS=[
+let MV=null;                       // {cx,cy,span}: centre and width in world units, kept across renders
+const AREAS=[                      // [key, label, north, south, west, east]
   ['coast','The coast',   -26.36,-26.72,153.02,153.16],
   ['coolum','Coolum',     -26.512,-26.575,153.06,153.112],
   ['noosa','Noosa',       -26.370,-26.42,153.055,153.130],
@@ -686,96 +700,157 @@ const TOWNS=[
 const COAST=[[-26.3792,153.1195],[-26.3853,153.0943],[-26.4049,153.1084],
   [-26.4810,153.0971],[-26.5314,153.0924],[-26.5467,153.1025],[-26.6042,153.0970],
   [-26.6833,153.1234],[-26.8038,153.1308],[-27.0000,153.1600],[-27.3000,153.2100]];
-
 const merc=la=>(180/Math.PI)*Math.log(Math.tan(Math.PI/4+la*Math.PI/360));
-function mapHTML(){
-  const a=AREAS.find(x=>x[0]===area)||AREAS[0];
-  let [,label,latN,latS,lonW,lonE]=a;
-  let y0=merc(latN), y1=merc(latS);
-  // keep every area a shape that suits a phone, only ever widening the view
-  const MAXA=1.55, MINA=0.72, asp=(y0-y1)/(lonE-lonW);
-  if(asp>MAXA){const w=(y0-y1)/MAXA, m=(lonW+lonE)/2; lonW=m-w/2; lonE=m+w/2;}
-  else if(asp<MINA){const h=(lonE-lonW)*MINA, m=(y0+y1)/2; y0=m+h/2; y1=m-h/2;}
-  const Wd=1000, Ht=Math.round(Wd*(y0-y1)/(lonE-lonW));
-  const px=lo=>(lo-lonW)/(lonE-lonW)*Wd, py=la=>(y0-merc(la))/(y0-y1)*Ht;
-  const inside=(la,lo)=>merc(la)<=y0&&merc(la)>=y1&&lo>=lonW&&lo<=lonE;
+const wy=la=>-merc(la);            // world y grows southwards, like a screen
+const SPAN_MIN=0.006, SPAN_MAX=1.5;
 
-  const coast=COAST.map(([la,lo])=>`${px(lo).toFixed(1)},${py(la).toFixed(1)}`).join(' ');
-  const sea=`${coast} ${Wd+40},${Ht+40} ${Wd+40},-40`;
-
-  // gather what we can place
+function stageSize(){const st=el('.mapstage');return st?[st.clientWidth||358,st.clientHeight||480]:[358,480];}
+function fitArea(key){
+  const a=AREAS.find(x=>x[0]===key)||AREAS[0]; const [,,N,S,W,E]=a; const [pw,ph]=stageSize();
+  const spanX=Math.max(E-W,(wy(S)-wy(N))*pw/ph)*1.08;
+  MV={cx:(W+E)/2,cy:(wy(N)+wy(S))/2,span:Math.min(SPAN_MAX,Math.max(SPAN_MIN,spanX))};
+  area=key;
+}
+function mapPlaces(){
   const pts=[];
   filtered().forEach(i=>{
     if(i.id.startsWith('u'))return;
     const raw=i.pin||i.mappin; if(!raw)return;
     const [la,lo]=raw.split(',').map(Number);
-    if(!inside(la,lo))return;
-    pts.push({i,la,lo,exact:!!i.pin});
+    pts.push({i,la,lo,x:lo,y:wy(la),exact:!!i.pin});
   });
-  // Nudge overlapping markers apart in pixel space, so a dense town like
-  // Coolum stays readable at every zoom. A hairline ties each marker back
-  // to where it actually is.
-  pts.forEach((p,k)=>{p.tx=px(p.lo); p.ty=py(p.la); p.x=p.tx; p.y=p.ty;
-    if(pts.some(q=>q!==p&&q.tx===p.tx&&q.ty===p.ty)){   // identical: break the tie
-      p.x+=Math.cos(k)*0.6; p.y+=Math.sin(k)*0.6;}});
-  const span=lonE-lonW;
-  const R=span<=0.12?32:span<=0.30?27:19;   // marker radius in viewBox units
-  const SEP=R*2.35, MAXOFF=R*2.4;           // never displace a marker beyond this
-  for(let it=0;it<80;it++){
-    let moved=false;
-    for(let i=0;i<pts.length;i++)for(let j=i+1;j<pts.length;j++){
-      const a=pts[i],b=pts[j];
-      const dx=b.x-a.x, dy=b.y-a.y, d=Math.hypot(dx,dy)||0.01;
-      if(d<SEP){
-        const push=(SEP-d)/2/d;
-        a.x-=dx*push; a.y-=dy*push; b.x+=dx*push; b.y+=dy*push; moved=true;
-      }
-    }
-    if(!moved)break;
-  }
-  // a nudged marker that ends up far from the truth is worse than an overlap
-  pts.forEach(p=>{
-    const dx=p.x-p.tx, dy=p.y-p.ty, d=Math.hypot(dx,dy);
-    if(d>MAXOFF){p.x=p.tx+dx/d*MAXOFF; p.y=p.ty+dy/d*MAXOFF;}
-  });
-
-  const towns=TOWNS.filter(([,la,lo,rk])=>inside(la,lo)&&(rk===1||span<=0.30)).map(([nm,la,lo])=>
-    `<g><circle cx="${px(lo).toFixed(1)}" cy="${py(la).toFixed(1)}" r="${(R*0.22).toFixed(1)}" fill="#8B5F68"/>
-     <text class="mt" style="font-size:${Math.round(R*0.98)}px" x="${(px(lo)+R*0.45).toFixed(1)}" y="${(py(la)-R*0.45).toFixed(1)}">${esc(nm)}</text></g>`).join('');
-
-  const marks=pts.map(p=>{
-    const c=CATS[p.i.cat]||CATS.note;
-    const x=p.x.toFixed(1), y=p.y.toFixed(1);
-    const off=Math.hypot(p.x-p.tx,p.y-p.ty)>3;
-    return `<g class="mk" data-open="${p.i.id}">
-      ${off?`<line x1="${p.tx.toFixed(1)}" y1="${p.ty.toFixed(1)}" x2="${x}" y2="${y}" stroke="${c.fg}" stroke-width="3" opacity=".5"/>
-      <circle cx="${p.tx.toFixed(1)}" cy="${p.ty.toFixed(1)}" r="5" fill="${c.fg}" opacity=".65"/>`:''}
-      <circle cx="${x}" cy="${y}" r="${R}" fill="${c.bg}" stroke="${c.fg}"
-        stroke-width="${p.exact?R/6:R/7.5}" ${p.exact?'':`stroke-dasharray="${(R*0.3).toFixed(1)} ${(R*0.23).toFixed(1)}"`}/>
-      <text class="me" style="font-size:${Math.round(R*1.03)}px" x="${x}" y="${y}">${c.em}</text>
-      <title>${esc(p.i.title)}</title></g>`;}).join('');
-
-  const chips=AREAS.map(x=>
-    `<button class="mbtn" data-area="${x[0]}" aria-pressed="${x[0]===area}">${esc(x[1])}</button>`).join('');
+  // places that share the exact same spot get a small fixed ring so all stay tappable
+  const g={}; pts.forEach(p=>{const k=p.la+','+p.lo;(g[k]=g[k]||[]).push(p);});
+  Object.values(g).forEach(arr=>arr.forEach((p,k)=>{
+    p.ox=0;p.oy=0; if(arr.length>1){const t=k/arr.length*Math.PI*2;p.ox=Math.cos(t)*15;p.oy=Math.sin(t)*15;}}));
+  return pts;
+}
+function mapShell(){
+  const chips=AREAS.map(x=>`<button class="mbtn" data-area="${x[0]}" aria-pressed="${x[0]===area}">${esc(x[1])}</button>`).join('');
+  const pts=mapPlaces();
   const legend=ORDER.filter(k=>pts.some(p=>p.i.cat===k)).map(k=>
     `<span class="lg"><i style="background:${CATS[k].bg};border-color:${CATS[k].fg}">${CATS[k].em}</i>${CATS[k].label}</span>`).join('');
   const missing=filtered().filter(i=>!i.id.startsWith('u')&&!i.pin&&!i.mappin&&i.place).length;
-
+  const sea=COAST.map(([la,lo])=>`${lo},${wy(la)}`).join(' ')+` 160,${wy(-28)} 160,${wy(-25)}`;
+  const coast=COAST.map(([la,lo])=>`${lo},${wy(la)}`).join(' ');
   return `<div class="mapwrap">
     <div class="mareas">${chips}</div>
-    <svg class="map" viewBox="0 0 ${Wd} ${Ht}" role="img" aria-label="Map of ${esc(label)}">
-      <rect x="-40" y="-40" width="${Wd+80}" height="${Ht+80}" fill="#FFF6F2"/>
-      <polygon points="${sea}" fill="#DCEBF0"/>
-      <polyline points="${coast}" fill="none" stroke="#9FC4CE" stroke-width="6"/>
-      ${marks}${towns}
-    </svg>
+    <div class="mapstage" role="application" aria-label="Map">
+      <svg viewBox="0 0 1 1" preserveAspectRatio="none" aria-hidden="true">
+        <rect x="140" y="${wy(-24)}" width="30" height="${wy(-29)-wy(-24)}" fill="#FFF6F2"/>
+        <polygon points="${sea}" fill="#DCEBF0"/>
+        <polyline points="${coast}" fill="none" stroke="#9FC4CE" stroke-width="2" vector-effect="non-scaling-stroke"/>
+      </svg>
+      <div class="mkrs">${pts.map(p=>{const c=CATS[p.i.cat]||CATS.note;
+        return `<div class="mkr${p.exact?'':' ap'}" role="button" tabindex="0" data-id="${p.i.id}"
+          style="--c:${c.fg};--b:${c.bg}"><i>${c.em}</i><b>${esc(p.i.title)}</b></div>`;}).join('')}</div>
+      <div class="towns"></div>
+      <div class="mzoom"><button data-z="in" aria-label="Zoom in">+</button><button data-z="out" aria-label="Zoom out">−</button></div>
+    </div>
     <p class="mnote">${pts.length} places shown${missing?` · ${missing} have no map position`:''}.
-      A dashed ring means the spot is approximate — the street or the town rather than the door.
-      The coast is traced through the beach pins, so treat it as indicative.</p>
+      Pinch or use + to zoom; names appear as places spread out. A dashed ring means the spot is
+      approximate — the street or the town rather than the door. The coast is traced through the
+      beach pins, so treat it as indicative.</p>
     <div class="legend">${legend}</div>
   </div>`;
 }
-function S_items(){return S.items.filter(i=>!i.id.startsWith('u'));}
+function mapDraw(){
+  const st=el('.mapstage'); if(!st||!MV)return;
+  const [W,H]=stageSize(), spanY=MV.span*H/W, x0=MV.cx-MV.span/2, y0=MV.cy-spanY/2;
+  st.querySelector('svg').setAttribute('viewBox',`${x0} ${y0} ${MV.span} ${spanY}`);
+  const px=(x,y)=>[(x-x0)/MV.span*W,(y-y0)/spanY*H];
+  // markers: constant pixel size, positioned each frame
+  const nodes=[...st.querySelectorAll('.mkr')], pts=mapPlaces(), byId={};
+  pts.forEach(p=>byId[p.i.id]=p);
+  const shown=[];
+  nodes.forEach(n=>{
+    const p=byId[n.dataset.id]; if(!p){n.hidden=true;return;}
+    const [x,y]=px(p.x,p.y); const sx=x+p.ox, sy=y+p.oy;
+    const on=sx>-40&&sx<W+40&&sy>-40&&sy<H+40;
+    n.hidden=!on; if(!on)return;
+    n.style.transform=`translate(${sx.toFixed(1)}px,${sy.toFixed(1)}px)`;
+    shown.push({n,x:sx,y:sy});
+  });
+  // a name shows once nothing else is crowding it, or when you are right in close
+  shown.forEach(a=>{
+    const lab=a.n.querySelector('b'), lw=lab.offsetWidth+34;
+    const left=a.x+lw>W&&a.x-lw>0;                        // flip when it would run off the right
+    const lo=left?a.x-lw:a.x, hi=left?a.x:a.x+lw;
+    const clear=a.x>=0&&a.x<=W&&(MV.span<=0.02||
+      !shown.some(b=>b!==a&&b.x>lo-14&&b.x<hi+14&&Math.abs(b.y-a.y)<30&&!(b.x===a.x&&b.y===a.y)));
+    a.n.classList.toggle('lbl',clear); a.n.classList.toggle('lbl-l',clear&&left);
+  });
+  // towns: the big ones always, the rest once you are closer in
+  el('.towns').innerHTML=TOWNS.filter(([,,,rk])=>rk===1||MV.span<=0.36).map(([nm,la,lo])=>{
+    const [x,y]=px(lo,wy(la)); if(x<-60||x>W+60||y<-20||y>H+20)return '';
+    return `<div class="town" style="transform:translate(${x.toFixed(1)}px,${y.toFixed(1)}px)"><span></span>${esc(nm)}</div>`;}).join('');
+  el('.mareas').querySelectorAll('.mbtn').forEach(b=>b.setAttribute('aria-pressed',b.dataset.area===area));
+}
+function zoomAt(px,py,factor){
+  const [W,H]=stageSize(), spanY=MV.span*H/W, x0=MV.cx-MV.span/2, y0=MV.cy-spanY/2;
+  const wx=x0+px/W*MV.span, wyy=y0+py/H*spanY;
+  const ns=Math.min(SPAN_MAX,Math.max(SPAN_MIN,MV.span*factor)), nsY=ns*H/W;
+  MV={cx:wx-(px/W-0.5)*ns, cy:wyy-(py/H-0.5)*nsY, span:ns}; area=''; mapDraw();
+}
+function mapMount(){
+  const st=el('.mapstage'); if(!st)return;
+  if(!MV)fitArea('coast');
+  el('.mareas').onclick=e=>{const b=e.target.closest('[data-area]'); if(b){fitArea(b.dataset.area);mapDraw();}};
+  const rect=()=>st.getBoundingClientRect();
+  st.querySelector('.mzoom').onclick=e=>{const b=e.target.closest('[data-z]'); if(!b)return;
+    const [W,H]=stageSize(); zoomAt(W/2,H/2,b.dataset.z==='in'?0.5:2);};
+  const ptrs=new Map(); let drag=null,pinch=null,moved=0,lastTap=0,lastXY=null,tapTarget=null;
+  const spanYf=()=>{const [W,H]=stageSize();return MV.span*H/W;};
+  st.onpointerdown=e=>{
+    if(e.target.closest('.mzoom'))return;               // the buttons are ordinary buttons
+    // capture retargets later events to the stage, so remember what was under the finger now
+    tapTarget=ptrs.size===0?e.target.closest('.mkr'):null;
+    try{st.setPointerCapture(e.pointerId);}catch(err){}
+    ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY}); moved=0;
+    if(ptrs.size===1){drag={x:e.clientX,y:e.clientY,cx:MV.cx,cy:MV.cy};pinch=null;}
+    else if(ptrs.size===2){const [p,q]=[...ptrs.values()], r=rect(), mx=(p.x+q.x)/2-r.left, my=(p.y+q.y)/2-r.top;
+      const [W,H]=stageSize(), x0=MV.cx-MV.span/2, y0=MV.cy-spanYf()/2;
+      pinch={d0:Math.hypot(p.x-q.x,p.y-q.y),span0:MV.span,wx:x0+mx/W*MV.span,wyy:y0+my/H*spanYf()}; drag=null;}
+    e.preventDefault();
+  };
+  st.onpointermove=e=>{
+    if(!ptrs.has(e.pointerId))return;
+    const prev=ptrs.get(e.pointerId); moved+=Math.hypot(e.clientX-prev.x,e.clientY-prev.y);
+    ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
+    const [W,H]=stageSize(), r=rect();
+    if(pinch&&ptrs.size>=2){
+      const [p,q]=[...ptrs.values()], d=Math.hypot(p.x-q.x,p.y-q.y)||1, mx=(p.x+q.x)/2-r.left, my=(p.y+q.y)/2-r.top;
+      const ns=Math.min(SPAN_MAX,Math.max(SPAN_MIN,pinch.span0*pinch.d0/d)), nsY=ns*H/W;
+      MV={cx:pinch.wx-(mx/W-0.5)*ns, cy:pinch.wyy-(my/H-0.5)*nsY, span:ns}; area=''; mapDraw();
+    }else if(drag){
+      MV.cx=drag.cx-(e.clientX-drag.x)/W*MV.span; MV.cy=drag.cy-(e.clientY-drag.y)/H*spanYf();
+      if(moved>4)area=''; mapDraw();
+    }
+  };
+  const up=e=>{
+    const was=ptrs.size; ptrs.delete(e.pointerId);
+    if(ptrs.size<2)pinch=null;
+    if(ptrs.size===1){const [p]=[...ptrs.values()]; drag={x:p.x,y:p.y,cx:MV.cx,cy:MV.cy};}
+    if(ptrs.size===0){drag=null;
+      if(was===1&&moved<7){                                  // a tap, not a drag
+        swallowClick=true; setTimeout(()=>swallowClick=false,400);
+        if(tapTarget){detail(tapTarget.dataset.id);tapTarget=null;return;}
+        const now=Date.now(), r=rect(), x=e.clientX-r.left, y=e.clientY-r.top;
+        if(now-lastTap<320&&lastXY&&Math.hypot(x-lastXY[0],y-lastXY[1])<30){zoomAt(x,y,0.5);lastTap=0;}
+        else{lastTap=now;lastXY=[x,y];}
+      }}
+  };
+  st.onpointerup=up; st.onpointercancel=up;
+  st.onwheel=e=>{e.preventDefault(); const r=rect(); zoomAt(e.clientX-r.left,e.clientY-r.top,Math.exp(e.deltaY*0.0016));};
+  st.onkeydown=e=>{const m=e.target.closest('.mkr'); if(m&&(e.key==='Enter'||e.key===' ')){e.preventDefault();detail(m.dataset.id);}};
+  ['gesturestart','gesturechange'].forEach(t=>st.addEventListener(t,e=>e.preventDefault()));
+  mapDraw();
+}
+window.addEventListener('resize',()=>{if(view==='map')mapDraw();});
+/* A touch tap fires a click after pointerup. By then the sheet has opened and
+   its scrim is under the finger, so that click would close it again. */
+let swallowClick=false;
+document.addEventListener('click',e=>{if(swallowClick){swallowClick=false;e.stopPropagation();e.preventDefault();}},true);
 
 function knowHTML(){
   if(cat!=='all'||query)return '';
