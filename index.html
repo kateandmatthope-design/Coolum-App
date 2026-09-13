@@ -105,6 +105,21 @@ main{padding:4px 16px 0}
 .empty{background:var(--paper);border:1px dashed var(--hair);border-radius:var(--r);padding:26px 20px;text-align:center;margin-top:14px}
 .empty p{margin:0 0 14px;color:var(--ink-soft);font-size:.92rem}
 
+.mapwrap{margin-top:12px}
+.mareas{display:flex;gap:7px;overflow-x:auto;padding-bottom:10px;scrollbar-width:none}
+.mareas::-webkit-scrollbar{display:none}
+.mbtn{flex:none;height:34px;padding:0 13px;border-radius:999px;border:1.5px solid var(--hair);
+  background:var(--paper);font-size:.85rem;font-weight:600;color:var(--ink-soft);white-space:nowrap}
+.mbtn[aria-pressed="true"]{background:var(--rose);border-color:var(--rose);color:var(--on-rose)}
+.map{width:100%;height:auto;display:block;border-radius:var(--r);border:1px solid var(--hair-soft);background:#FFF6F2}
+.map .mt{font-size:31px;font-weight:700;fill:#6B4750;paint-order:stroke;stroke:#FFF6F2;stroke-width:7px;pointer-events:none}
+.map .me{font-size:31px;text-anchor:middle;dominant-baseline:central;pointer-events:none}
+.map .mk{cursor:pointer}
+.mnote{font-size:.72rem;color:var(--ink-soft);margin:9px 2px 0;line-height:1.45}
+.legend{display:flex;flex-wrap:wrap;gap:7px 11px;margin:11px 2px 0}
+.lg{display:flex;align-items:center;gap:5px;font-size:.72rem;font-weight:600;color:var(--ink-soft)}
+.lg i{font-style:normal;width:21px;height:21px;border-radius:50%;border:1.5px solid;
+  display:flex;align-items:center;justify-content:center;font-size:11px}
 .know{margin:24px 0 0;background:var(--rose-deep);color:#FBDDE4;border-radius:var(--r);padding:16px 17px}
 .know h2{font-family:var(--display);font-size:1rem;margin:0 0 9px;color:#fff}
 .know ul{margin:0;padding-left:17px;font-size:.85rem;line-height:1.55}
@@ -202,6 +217,7 @@ footer button{font-size:.8rem;color:var(--ink-soft);text-decoration:underline;te
 <div class="tabs" role="tablist">
   <button role="tab" id="tab-ideas" aria-selected="true">Ideas</button>
   <button role="tab" id="tab-days" aria-selected="false">The six days</button>
+  <button role="tab" id="tab-map" aria-selected="false">Map</button>
 </div>
 <div class="chips" id="chips"></div>
 <main id="main"></main>
@@ -239,16 +255,16 @@ const DAYS=[
 ];
 /* ---- categories ---- */
 const CATS={
-  note:{label:'Practical',        bg:'#E6D6D8',fg:'#741D28'},
-  tour:{label:'Tours',            bg:'#FFEAF3',fg:'#9C5374'},
-  ride:{label:'E-bikes & hire',   bg:'#FCEAE1',fg:'#9A5839'},
-  wear:{label:'Clothes',          bg:'#F3E0E6',fg:'#A04763'},
-  shop:{label:'Markets & browsing',bg:'#FEEAEA',fg:'#9C5658'},
-  art:{label:'Art & making',      bg:'#EDDEE1',fg:'#903246'},
-  walk:{label:'Walks',            bg:'#F2F0DB',fg:'#756C24'},
-  beach:{label:'Beaches',         bg:'#F7EDDE',fg:'#88632F'},
-  eat:{label:'Eat & drink',       bg:'#F3E2DE',fg:'#9E4E39'},
-  trip:{label:'Day trips',        bg:'#EDE5DA',fg:'#865E2B'}
+  note:{label:'Practical',        bg:'#E6D6D8',fg:'#741D28',em:'📋'},
+  tour:{label:'Tours',            bg:'#FFEAF3',fg:'#9C5374',em:'🎟️'},
+  ride:{label:'E-bikes & hire',   bg:'#FCEAE1',fg:'#9A5839',em:'🚲'},
+  wear:{label:'Clothes',          bg:'#F3E0E6',fg:'#A04763',em:'👕'},
+  shop:{label:'Markets & browsing',bg:'#FEEAEA',fg:'#9C5658',em:'🛍️'},
+  art:{label:'Art & making',      bg:'#EDDEE1',fg:'#903246',em:'🎨'},
+  walk:{label:'Walks',            bg:'#F2F0DB',fg:'#756C24',em:'🥾'},
+  beach:{label:'Beaches',         bg:'#F7EDDE',fg:'#88632F',em:'🏖️'},
+  eat:{label:'Eat & drink',       bg:'#F3E2DE',fg:'#9E4E39',em:'🍴'},
+  trip:{label:'Day trips',        bg:'#EDE5DA',fg:'#865E2B',em:'🚗'}
 };
 /* photos per item, hero first: [src, photographer, licence].
    Full source URLs live in CREDITS.md. */
@@ -288,7 +304,7 @@ const PHOTOS={
 const ORDER=['note','tour','ride','wear','shop','art','walk','beach','eat','trip'];
 
 /* ---- seeded content ---- */
-const SEED_V=13;
+const SEED_V=14;
 const SEED=[
 /* ===== practical ===== */
 {id:'n1',cat:'note',route:{m:'driving',f:'-27.36987,153.06499',t:'-26.52813,153.09161',v:'',l:'Virginia depot to the holiday park, about 110km'},wherelab:'Where you land',spot:'Brisbane Airport, domestic terminal',addr:'Airport Dr, Brisbane Airport QLD 4008',pin:'-27.38565,153.11849',links:[['Brisbane Airport — terminal info','https://www.bne.com.au/']],photo:'img/n1.jpg',must:1,day:'d1',title:'Monday — Brisbane to Coolum',
@@ -333,25 +349,25 @@ const SEED=[
 {id:'t6',cat:'tour',wherelab:'Picked up from',spot:'Your accommodation in Coolum',addr:'Coolum Beach Holiday Park, David Low Way, Coolum Beach',pin:'-26.52813,153.09161',links:[['Maleny — Visit Sunshine Coast','https://www.visitsunshinecoast.com/maleny'],['Montville — Visit Sunshine Coast','https://www.visitsunshinecoast.com/montville']],book:1,title:'Hinterland day tour',
  place:'Sunshine Coast hinterland day tour',
  note:'Small-group tours cover Maleny, Montville, the Glass House Mountains lookouts and usually a distillery or cheese stop. The case for taking one rather than driving yourself: the hinterland roads are winding, the villages are all tasting-based, and you cannot do both.\n\nMost pick up from Coolum accommodation.\n\nChecked 13 Sep 2026\nJoel\'s Journeys is one operator that picks up from Coolum Beach, at about 8.40am, for roughly an eight-hour day taking in Maleny, Montville, Mary Cairncross and a two-course lunch at Secrets on the Lake. Shared tours run Wednesday to Sunday and need a minimum of three adults.\n\nTheir site blocks automated access, so I could not confirm the price or that the Coolum pick-up still stands — worth a phone call first.\n\nWednesday is your Eumundi day, so Thursday or Friday is the natural fit for this.\n\nNo driving and no pin to find — they collect from the park. Worth doing on a day the coast weather is poor, since the hinterland is just as good in cloud.'},
-{id:'t7',cat:'tour',wherelab:'Where it is',spot:'Australia Zoo',addr:'Steve Irwin Way, Beerwah QLD 4519',links:[['Australia Zoo — tickets and hours','https://www.australiazoo.com.au/visit/tickets/']],book:1,title:'Australia Zoo with transfers',
+{id:'t7',cat:'tour',mappin:'-26.83392,152.96507',wherelab:'Where it is',spot:'Australia Zoo',addr:'Steve Irwin Way, Beerwah QLD 4519',links:[['Australia Zoo — tickets and hours','https://www.australiazoo.com.au/visit/tickets/']],book:1,title:'Australia Zoo with transfers',
  place:'Australia Zoo Beerwah',
  note:'Beerwah is about an hour south. Several operators run door-to-door transfers from Coolum, which turns a long drive plus parking into a read-a-book-both-ways day.\n\nAllow the whole day. The Crocoseum show is the thing to time your arrival around.\n\nChecked 13 Sep 2026\nThe zoo is open 9am–5pm daily and adult entry is A$77. The animals start heading to bed around 4.30pm, so a late arrival wastes the ticket — this is a get-there-at-opening day.\n\nEntry includes the conservation shows through the day, the free shuttle bus around the grounds and the wildlife hospital sneak peek.\n\nI could not verify any particular door-to-door transfer operator from Coolum: the tour sites that list them all block automated access. Ring one before you count on it rather than assuming.\n\nAn hour south of Coolum down the Bruce Highway and Steve Irwin Way. Free parking on site. Get there for 9am opening: the animals start going to bed at 4.30pm, so a late start wastes the ticket.'},
-{id:'t8',cat:'tour',wherelab:'Where the boat leaves',spot:'Noosa River jetty, Noosaville',addr:'Gympie Tce, Noosaville QLD 4566',links:[['Noosa River & Canal Cruises — sunset cruise','https://www.noosariverandcanalcruises.com.au/sunset-cruise']],photo:'img/t8.jpg',book:1,title:'Noosa River sunset cruise',
+{id:'t8',cat:'tour',mappin:'-26.39695,153.06571',wherelab:'Where the boat leaves',spot:'Noosa River jetty, Noosaville',addr:'Gympie Tce, Noosaville QLD 4566',links:[['Noosa River & Canal Cruises — sunset cruise','https://www.noosariverandcanalcruises.com.au/sunset-cruise']],photo:'img/t8.jpg',book:1,title:'Noosa River sunset cruise',
  place:'Noosa River sunset cruise',
  note:'Quiet, cheap and low effort — an hour or two on the river as the light goes. Remember sunset is around 6pm Queensland time in October, so these leave earlier than you would expect.\n\nChecked 13 Sep 2026\nNoosa River & Canal Cruises: A$38 an adult, about 2.5 hours, departing Noosaville with pick-up also available from the Sofitel jetty at Noosa Heads.\n\nDeparture time moves with the sunset across the year — 3.15pm in the depths of winter out to 4.45pm in summer — so early October will sit somewhere between. They ask you to ring or text on the day for the exact time. Phone +61 414 727 765.\n\nThere is a bar on board and you are welcome to bring your own snacks.\n\nGympie Terrace runs along the river at Noosaville with free parking along it, and a row of places to eat if you want dinner after. Thirty minutes from Coolum. Ring +61 414 727 765 on the day for the exact departure time.'},
 
 /* ===== e-bikes & hire ===== */
-{id:'r1',cat:'ride',wherelab:'Delivered to you',spot:'ecoTekk delivers to the holiday park',addr:'Coolum Beach Holiday Park, David Low Way, Coolum Beach',links:[['ecoTekk e-bike hire — rates and booking','https://www.ecotekk.com.au/sunshine-coast/bike-hire/']],book:1,must:1,title:'ecoTekk e-bike hire, delivered',
+{id:'r1',cat:'ride',mappin:'-26.52813,153.09161',wherelab:'Delivered to you',spot:'ecoTekk delivers to the holiday park',addr:'Coolum Beach Holiday Park, David Low Way, Coolum Beach',links:[['ecoTekk e-bike hire — rates and booking','https://www.ecotekk.com.au/sunshine-coast/bike-hire/']],book:1,must:1,title:'ecoTekk e-bike hire, delivered',
  place:'ecoTekk Sunshine Coast',
  url:'https://www.ecotekk.com.au/sunshine-coast/bike-hire/',
  note:'The one that suits you best: a husband-and-wife operation that delivers solar-charged e-bikes to your accommodation anywhere between Coolum and Caloundra, and collects them from the same place. No need to fit a bike in the campervan or drive anywhere to pick it up.\n\nThey do multi-day hire as well as single days, and guided tours if you want company. Their own material says the bikes have the range for a 50km round trip around Mount Coolum, which is more than you will want in a day.\n\nWorth booking before you leave — it is a small operation.\n\nChecked 13 Sep 2026\nRates: half day (4 hours) A$64, full day (8 hours) A$95, overnight A$116, two days A$136, and A$177 for three days or more. Helmets and a lock are included, pannier baskets if you want them, and chargers come with overnight and multi-day hires.\n\nDelivery is not free. It is a fixed fee that varies by suburb, and a single bike on a half-day hire carries a A$30 surcharge — so a multi-day hire is far better value than repeated single days. Book online through their site or ring 0473 635 865.\n\nThe 50km range figure above is not stated anywhere on their current hire page, so treat it as rough rather than a promise.\n\nNo pin needed for this one: they bring the bikes to the holiday park and collect them from the same spot, so you never have to get a bike into the van or drive anywhere to pick one up.\n\nRing 0473 635 865 to confirm the drop-off point with reception before the day.'},
 {id:'r2',cat:'ride',route:{m:'bicycling',f:'-26.53135,153.09238',t:'-26.60424,153.09702',v:'-26.54670,153.10248',l:'Coolum to Marcoola via Point Arkwright, about 7km'},wherelab:'Nearest access to the path',spot:'Beachfront path at Coolum Surf Club',addr:'1789 David Low Way, Coolum Beach',pin:'-26.53135,153.09238',links:[['Coolum Beach — Visit Sunshine Coast','https://www.visitsunshinecoast.com/coolum']],photo:'img/r2.jpg',title:'Ride the Coastal Pathway south',
  place:'Coastal Pathway Marcoola',
  note:'A dedicated path runs south from Coolum through Mount Coolum, Marcoola and Mudjimba towards Maroochydore, almost all of it flat and beachside. On an e-bike, Coolum to Mudjimba and back is an easy morning with a coffee stop at the North Shore shops.\n\nThis is the ride that makes hiring a bike worth it.\n\nYou do not have to go looking for the path. It runs along the beachfront directly in front of the surf club, two minutes from the holiday park. Turn right, heading south, and you are on it.\n\nThe route south: Coolum esplanade, then around behind Point Arkwright at -26.54670, 153.10248, then a long flat run through Yaroomba and Mount Coolum to Marcoola at about -26.59276, 153.09656. Coolum to Marcoola is roughly 7km one way, almost all of it flat, sealed and beachside.\n\nKeep going and it continues towards Mudjimba and Maroochydore. Coolum to Mudjimba and back is an easy morning on an e-bike with a coffee at the North Shore shops.\n\nIt is shared with walkers and dogs, so it is not a fast ride. The sea breeze usually comes up from the north-east after about 10am, which means the run home from the south is into it.'},
-{id:'r3',cat:'ride',route:{m:'bicycling',f:'-26.53135,153.09238',t:'-26.48098,153.09712',v:'',l:'Coolum to Peregian village, about 10km'},wherelab:'The far end of the ride',spot:'Peregian Beach village square',addr:'Kingfisher Dr, Peregian Beach',links:[['Peregian Beach — Visit Noosa','https://www.visitnoosa.com.au/peregian-beach']],title:'Ride north to Peregian',
+{id:'r3',cat:'ride',mappin:'-26.48110,153.09618',route:{m:'bicycling',f:'-26.53135,153.09238',t:'-26.48098,153.09712',v:'',l:'Coolum to Peregian village, about 10km'},wherelab:'The far end of the ride',spot:'Peregian Beach village square',addr:'Kingfisher Dr, Peregian Beach',links:[['Peregian Beach — Visit Noosa','https://www.visitnoosa.com.au/peregian-beach']],title:'Ride north to Peregian',
  place:'Peregian Beach Village Square',
  note:'About 10km up the coast on David Low Way and the bike path, through the heath of the national park. Peregian village square at the other end has cafes and a handful of good shops — so it doubles as your browsing day without the van.\n\nCheck the wind direction before you go; a northerly makes the way home hard work on a normal bike, though not on an electric one.\n\nAbout 10km north of Coolum. The path runs behind the beach through the national park heath most of the way, so it is flat, quiet and sealed, with only a couple of road crossings.\n\nAt the far end: a village green ringed by cafes, a bookshop and a handful of boutiques, and the beach two minutes away. It doubles as the browsing day without taking the van anywhere.\n\nCheck the wind before you set off. A north-easterly makes the way home hard work on a normal bike, though much less so on an electric one.'},
-{id:'r4',cat:'ride',wherelab:'Launch point',spot:'Cotton Tree, Maroochy River mouth',addr:'Cotton Tree Parade, Maroochydore',links:[['Maroochydore and Cotton Tree — Visit Sunshine Coast','https://www.visitsunshinecoast.com/maroochydore'],['Queensland boating and paddling rules','https://www.qld.gov.au/recreation/activities/boating-fishing']],photo:'img/r4.jpg',title:'Stand-up paddleboard, Maroochy River',
+{id:'r4',cat:'ride',mappin:'-26.65485,153.10074',wherelab:'Launch point',spot:'Cotton Tree, Maroochy River mouth',addr:'Cotton Tree Parade, Maroochydore',links:[['Maroochydore and Cotton Tree — Visit Sunshine Coast','https://www.visitsunshinecoast.com/maroochydore'],['Queensland boating and paddling rules','https://www.qld.gov.au/recreation/activities/boating-fishing']],photo:'img/r4.jpg',title:'Stand-up paddleboard, Maroochy River',
  place:'stand up paddleboard hire Maroochy River',
  note:'Flat, protected water about 20 minutes south — the fallback if the surf is too messy to swim in. Hire is usually by the hour from Cotton Tree or Chambers Island.\n\nAbout 25 minutes south. The river mouth at Cotton Tree is flat, protected and shallow, which makes it the fallback when the surf is too messy to swim in.\n\nHire is usually by the hour from operators along Cotton Tree Parade or near Chambers Island. I could not confirm a specific operator\'s current prices from their own site, so treat this as turn-up-and-look rather than something to book ahead.\n\nGo near high tide and early: the water is glassiest before the sea breeze, and the river runs hard on a falling tide near the mouth, which is not where you want to be on a first paddle.\n\nCotton Tree has toilets, showers, a park and a good run of cafes on King Street, so it works as a morning rather than just a paddle.'},
 {id:'w1',cat:'wear',wherelab:'The strip',spot:'Hastings Street, Noosa Heads',addr:'Hastings St, Noosa Heads QLD 4567',pin:'-26.38644,153.08924',links:[['Visit Noosa','https://www.visitnoosa.com.au/'],['Noosa — Visit Sunshine Coast','https://www.visitsunshinecoast.com/noosa']],photo:'img/w1.jpg',title:'Hastings Street, Noosa',
@@ -446,13 +462,13 @@ const SEED=[
 {id:'k4',cat:'walk',wherelab:'Lookout car park',spot:'Point Arkwright lookout',addr:'Jubilee Esplanade, Point Arkwright',pin:'-26.54670,153.10248',links:[['Coolum and Yaroomba — Visit Sunshine Coast','https://www.visitsunshinecoast.com/coolum']],photo:'img/k4.jpg',title:'Point Arkwright and Yaroomba',
  place:'Point Arkwright Lookout',
  note:'Five minutes south of Coolum. A short walk out to a headland lookout that is one of the better land-based whale-watching spots on the coast during the migration — bring binoculars and give it twenty patient minutes.\n\nYou can continue along the beach south to Yaroomba and back.\n\nFive minutes south of Coolum on David Low Way, then into Jubilee Esplanade. Small car park right at the headland, so it is a two minute walk rather than a hike.\n\nOne of the better land-based whale spots on this coast during the migration, which runs to the end of October. Give it twenty patient minutes and take binoculars — from the headland you are looking down into the water rather than across it.\n\nFrom here you can drop to the beach and walk south to Yaroomba. No facilities at the lookout itself.'},
-{id:'k5',cat:'walk',wherelab:'Northern access',spot:'Stumers Creek car park',addr:'Stumers Creek Rd, off David Low Way, Coolum Beach',links:[['Coolum Beach — Visit Sunshine Coast','https://www.visitsunshinecoast.com/coolum']],title:'Stumers Creek to Marcoola',
+{id:'k5',cat:'walk',mappin:'-26.52087,153.08309',wherelab:'Northern access',spot:'Stumers Creek car park',addr:'Stumers Creek Rd, off David Low Way, Coolum Beach',links:[['Coolum Beach — Visit Sunshine Coast','https://www.visitsunshinecoast.com/coolum']],title:'Stumers Creek to Marcoola',
  place:'Stumers Creek Coolum Beach',
  note:'North end of Coolum, where the creek meets the sea. A long flat beach walk with barely anyone on it, and an off-leash dog area if you want to say hello to other people\u2019s dogs.\n\nThe creek itself is worth the walk — it shifts with every tide and the light on it in the late afternoon is lovely.\n\nThe northern end of Coolum, about 2km up David Low Way from the holiday park, then in on Stumers Creek Road. There is a gravel car park at the end.\n\nThe creek mouth shifts with every tide, so the walk is never quite the same. Head north along the sand and you can keep going to Marcoola. Almost nobody is up here on a weekday morning.\n\nThis is an off-leash dog area, which is the main reason locals come. Unpatrolled, so it is for walking and wading rather than swimming.\n\nI could not verify an exact pin for the car park from an authoritative source, so this one is the street rather than a precise point — it is signposted off David Low Way.'},
-{id:'k6',cat:'walk',wherelab:'Reserve entrance',spot:'Mary Cairncross Scenic Reserve',addr:'148 Mountain View Rd, Maleny QLD 4552',links:[['Mary Cairncross Scenic Reserve — Sunshine Coast Council','https://mary-cairncross.sunshinecoast.qld.gov.au/']],photo:'img/k6.jpg',title:'Mary Cairncross Scenic Reserve',
+{id:'k6',cat:'walk',mappin:'-26.77658,152.88035',wherelab:'Reserve entrance',spot:'Mary Cairncross Scenic Reserve',addr:'148 Mountain View Rd, Maleny QLD 4552',links:[['Mary Cairncross Scenic Reserve — Sunshine Coast Council','https://mary-cairncross.sunshinecoast.qld.gov.au/']],photo:'img/k6.jpg',title:'Mary Cairncross Scenic Reserve',
  place:'Mary Cairncross Scenic Reserve Maleny',
  note:'Fifty-five hectares of remnant subtropical rainforest near Maleny with a gentle 1.7km loop, plus a lookout lawn with the postcard view of the Glass House Mountains.\n\nSmall entry fee for the walk. Pair with Maleny\u2019s main street and you have a full hinterland day.\n\nWalking tracks are open 7am to 6pm. The Rainforest Discovery Centre opens 9am to 5pm. Entry to the walk is a gold coin donation. Phone 07 5494 2826.\n\nThe loop is about 2km, flat and sealed enough for a pram or a wheelchair — the council describe it as an easy walk, so it is a gentle hour rather than a hike. It protects a remnant of the Gondwana rainforest that once covered the whole Blackall Range.\n\nThe lookout lawn outside the centre has the postcard view across to the Glass House Mountains, and you do not have to pay or walk anywhere to see it. There is a cafe on site.\n\nAbout an hour and ten from Coolum. Pair it with Maleny\'s main street, five minutes away.'},
-{id:'k7',cat:'walk',wherelab:'Car park',spot:'Kondalilla Falls day use area',addr:'Kondalilla Falls Rd, off Flaxton Dr, Flaxton',links:[['Kondalilla National Park — Queensland Parks','https://parks.qld.gov.au/parks/kondalilla'],['Track notes and grading','https://parks.qld.gov.au/parks/kondalilla/about'],['Safety and closures','https://parks.qld.gov.au/parks/kondalilla/visiting-safely']],photo:'img/k7.jpg',title:'Kondalilla Falls',
+{id:'k7',cat:'walk',mappin:'-26.68181,152.83413',wherelab:'Car park',spot:'Kondalilla Falls day use area',addr:'Kondalilla Falls Rd, off Flaxton Dr, Flaxton',links:[['Kondalilla National Park — Queensland Parks','https://parks.qld.gov.au/parks/kondalilla'],['Track notes and grading','https://parks.qld.gov.au/parks/kondalilla/about'],['Safety and closures','https://parks.qld.gov.au/parks/kondalilla/visiting-safely']],photo:'img/k7.jpg',title:'Kondalilla Falls',
  place:'Kondalilla Falls National Park',
  note:'Near Montville. The full circuit is 4.7km through rainforest and down to the base of a 90m waterfall, with a swimming hole at the top. It is steep coming back up — that is the whole difficulty of it.\n\nAbout an hour and fifteen from Coolum, so treat it as the anchor of a hinterland day rather than an add-on.\n\nSignposted off Flaxton Drive between Montville and Mapleton, about an hour and fifteen from Coolum. There is a day use area with toilets, picnic tables and a car park; a parking fee applies at this park, so have a card.\n\nThe full circuit is 4.7km through rainforest to the base of the 90m falls. The rock pool at the top is a shorter walk in. All of the difficulty is on the way back — it is a long climb out of the gorge, and the steps are uneven.\n\nSwimming is at the top pool rather than the base. Check the Queensland Parks page before you drive up: this park closes after heavy rain and during fire risk, and it is a long way to go to find a gate shut.\n\nI could not verify an exact pin for the car park from an authoritative source, so this one is the road rather than a precise point.\n\nTwo things Queensland Parks say plainly about this park. There is no drinking water available, so carry your own. And people have died or been permanently paralysed slipping over the falls, so stay behind the fences and on the track — the rock at the top is polished and wet.\n\nTracks close during severe wet weather. Do not enter if closure signs are up.'},
 
@@ -460,13 +476,13 @@ const SEED=[
 {id:'b1',cat:'beach',wherelab:'Patrolled flags',spot:'Coolum Beach Surf Life Saving Club',addr:'1789 David Low Way, Coolum Beach',pin:'-26.53135,153.09238',links:[['Coolum Beach SLSC','https://www.coolumsurfclub.com.au/'],['Beach and surf conditions — Beachsafe','https://beachsafe.org.au/']],photo:'img/b1.jpg',title:'Coolum main beach',
  place:'Coolum Beach Surf Life Saving Club',
  note:'Patrolled in front of the surf club, which is next door to the park. Swim between the flags — there are rips here, and on a solo trip that matters more than usual.\n\nThe October water is around 22–23°C, warm enough without a wetsuit for most people.\n\nThe club is directly next door to the holiday park, so this is your default swim — two minutes on foot.\n\nSwim between the flags. Coolum has permanent rips against the rock at both ends of the beach, and on a solo trip that matters more than it would otherwise: if you get into trouble there is nobody with you who knows you went in. Tell someone, or go when the flags are up.\n\nPatrol hours vary by season and are usually posted on the club\'s board at the top of the ramp — worth a glance on the way past rather than assuming.\n\nWater in early October is around 22-23C, warm enough without a wetsuit for most people. The club has showers, toilets and a kiosk.'},
-{id:'b2',cat:'beach',wherelab:'Northern access',spot:'Stumers Creek car park',addr:'Stumers Creek Rd, off David Low Way, Coolum Beach',links:[['Coolum Beach — Visit Sunshine Coast','https://www.visitsunshinecoast.com/coolum']],title:'Stumers Creek beach',
+{id:'b2',cat:'beach',mappin:'-26.52087,153.08309',wherelab:'Northern access',spot:'Stumers Creek car park',addr:'Stumers Creek Rd, off David Low Way, Coolum Beach',links:[['Coolum Beach — Visit Sunshine Coast','https://www.visitsunshinecoast.com/coolum']],title:'Stumers Creek beach',
  place:'Stumers Creek Coolum Beach',
  note:'The quiet end. Unpatrolled, so it is for walking and wading rather than swimming, but you will often have it to yourself.\n\nUnpatrolled and no facilities, so bring water and do not plan on swimming properly — the creek mouth and the bar shift constantly and there is no one watching.\n\nWhat it is good for is having a stretch of sand to yourself, wading in the creek at low tide, and the light in the late afternoon. Off-leash dog area, so expect company of the four-legged kind.\n\nAbout 2km north of the holiday park; easy on a bike along the beachfront.'},
 {id:'b3',cat:'beach',wherelab:'Patrolled flags',spot:'Peregian Beach Surf Life Saving Club',addr:'Kingfisher Dr, Peregian Beach',pin:'-26.48098,153.09712',links:[['Peregian Beach SLSC','https://www.peregianbeachslsc.com.au/'],['Peregian Beach — Visit Noosa','https://www.visitnoosa.com.au/peregian-beach']],photo:'img/b3.jpg',title:'Peregian Beach',
  place:'Peregian Beach Queensland',
  note:'Ten minutes north. A long, open, low-key stretch backed by national park heath, with the village a two-minute walk from the sand. Patrolled near the surf club.\n\nTen minutes north on David Low Way, or a flat 10km ride up the coastal path. Patrolled in front of the club; the rest of the beach runs for kilometres backed by national park heath with nobody on it.\n\nThe village is a two minute walk from the sand — a square of shops, a bookshop and cafes around a green — which makes this the easiest combination of a swim and a decent coffee on the whole coast.\n\nParking is free and usually available on Kingfisher Drive, unlike anywhere in Noosa.'},
-{id:'b4',cat:'beach',wherelab:'Patrolled flags',spot:'Sunshine Beach Surf Life Saving Club',addr:'Belmore Tce at Duke St, Sunshine Beach',links:[['Sunshine Beach SLSC','https://www.sunshinebeachslsc.com.au/'],['Beach and surf conditions — Beachsafe','https://beachsafe.org.au/']],photo:'img/b4.jpg',title:'Sunshine Beach',
+{id:'b4',cat:'beach',mappin:'-26.40485,153.10839',wherelab:'Patrolled flags',spot:'Sunshine Beach Surf Life Saving Club',addr:'Belmore Tce at Duke St, Sunshine Beach',links:[['Sunshine Beach SLSC','https://www.sunshinebeachslsc.com.au/'],['Beach and surf conditions — Beachsafe','https://beachsafe.org.au/']],photo:'img/b4.jpg',title:'Sunshine Beach',
  place:'Sunshine Beach Queensland',
  note:'The quieter side of Noosa, with better surf than Noosa Main and a proper beach feel. Patrolled. The surf club sits up on the hill with a view worth timing for late afternoon.\n\nThe ocean side of the Noosa headland, about 30 minutes from Coolum. Bigger, cleaner surf than Noosa Main and a proper beach feel, and far fewer people than Hastings Street.\n\nThe surf club sits up on the hill with the view, which makes it the best late-afternoon drink on this stretch. Duke Street above it has a short run of good shops and cafes.\n\nPatrolled in front of the club. It is a more serious beach than Noosa Main — the shorebreak can dump — so stay between the flags.\n\nYou can walk here through Noosa National Park from the Noosa Heads end if you would rather earn it, about 3km one way.'},
 {id:'b5',cat:'beach',wherelab:'Patrolled flags',spot:'Noosa Heads SLSC, Noosa Main Beach',addr:'69 Hastings St, Noosa Heads',pin:'-26.38667,153.09146',links:[['Noosa Heads SLSC','https://www.noosasurfclub.com.au/'],['Beach and surf conditions — Beachsafe','https://beachsafe.org.au/']],photo:'img/b5.jpg',title:'Noosa Main Beach',
@@ -477,11 +493,11 @@ const SEED=[
 {id:'e1',cat:'eat',wherelab:'Next door',spot:'Coolum Beach Surf Club',addr:'1789 David Low Way, Coolum Beach QLD 4573',pin:'-26.53135,153.09238',links:[['Coolum Beach SLSC','https://www.coolumsurfclub.com.au/']],must:1,title:'Coolum Beach Surf Club',
  place:'Coolum Beach Surf Club',
  note:'Right next door to the park. Casual, cheap, an unbeatable view over the beach, and the single easiest place to eat alone without thinking about it — you sign in, order at the counter, and nobody looks twice.\n\nGo about an hour before sunset and take the outside tables.\n\nLiterally next door to the park — two minutes on foot, no driving, no thinking about it.\n\nYou sign in at the door as a visitor, order at the counter and find a table. Nobody looks twice at one person eating alone, which is the whole point. Meals are club prices rather than restaurant prices.\n\nGo about an hour before sunset and take an outside table on the deck: it faces straight out over the patrolled beach. Sunset is around 6pm in early October, so that means arriving about 5.\n\nCheck their site for what is on — surf clubs often have a members\' draw or live music midweek that makes it busier than you would expect.'},
-{id:'e2',cat:'eat',wherelab:'Where it is',spot:'Canteen Kitchen + Bar',addr:'1748 David Low Way, Coolum Beach QLD 4573',links:[['Canteen Kitchen + Bar','https://www.canteenkitchenbar.com/']],title:'Canteen Kitchen + Bar',
+{id:'e2',cat:'eat',mappin:'-26.53135,153.09238',wherelab:'Where it is',spot:'Canteen Kitchen + Bar',addr:'1748 David Low Way, Coolum Beach QLD 4573',links:[['Canteen Kitchen + Bar','https://www.canteenkitchenbar.com/']],title:'Canteen Kitchen + Bar',
  place:'Canteen Kitchen Bar Coolum Beach',
  url:'https://www.tripadvisor.com.au/Restaurants-g257475-Coolum_Beach_Sunshine_Coast_Queensland.html',
  note:'Consistently well reviewed in Coolum for breakfast and coffee, and it does dinner too. Walkable from the park.\n\nFair warning from reviewers: eat outside and the birds will take an interest in your plate.\n\nChecked 13 Sep 2026\nWednesday to Sunday, 7am till late — closed Monday and Tuesday, so it is not an option on your first two nights. 1748 David Low Way, which is the beach road rather than the Birtwill Street strip. Bookings online or on 07 5471 7477.\n\nThe link on this card goes to a TripAdvisor list of every Coolum restaurant rather than to Canteen, and TripAdvisor blocks automated access, so nothing could be verified through it. The venue\'s own site is canteenkitchenbar.com.\n\nOn David Low Way rather than the Birtwill Street strip, a few minutes\' walk north of the park.'},
-{id:'e3',cat:'eat',wherelab:'Where it is',spot:'On the Coolum boardwalk',addr:'Beach Rd, Coolum Beach QLD 4573',links:[['Coolum Beach — Visit Sunshine Coast','https://www.visitsunshinecoast.com/coolum']],title:"Curly's on the Boardwalk",
+{id:'e3',cat:'eat',mappin:'-26.53135,153.09238',wherelab:'Where it is',spot:'On the Coolum boardwalk',addr:'Beach Rd, Coolum Beach QLD 4573',links:[['Coolum Beach — Visit Sunshine Coast','https://www.visitsunshinecoast.com/coolum']],title:"Curly's on the Boardwalk",
  place:"Curly's on the Boardwalk Coolum Beach",
  note:'On the Coolum boardwalk, so you get the water view without driving anywhere. Good for a long breakfast after the Point Perry walk.\n\nOn the boardwalk itself, so you get the water view without driving anywhere. Good for a long breakfast after the Point Perry walk, which finishes more or less at the door.\n\nI could not confirm their current hours from a site of their own, so treat it as a walk-past-and-look rather than something to plan around.'},
 {id:'e4',cat:'eat',wherelab:'Where it is',spot:'On the Coolum strip',addr:'Birtwill St, Coolum Beach QLD 4573',pin:'-26.52688,153.08816',links:[['Coolum Beach — Visit Sunshine Coast','https://www.visitsunshinecoast.com/coolum']],title:'Compound Surf & Espresso',
@@ -493,7 +509,7 @@ const SEED=[
 {id:'e6',cat:'eat',wherelab:'Where to sit',spot:'Tickle Park',addr:'Beach Rd at Birtwill St, Coolum Beach QLD 4573',pin:'-26.53035,153.09227',links:[['Coolum Beach — Visit Sunshine Coast','https://www.visitsunshinecoast.com/coolum']],title:'Fish and chips at Tickle Park',
  place:'Tickle Park Coolum Beach',
  note:'Takeaway from the strip, eaten on the grass under the pandanus with the beach in front of you. Cheapest good dinner in town and, on a solo trip, easily the most pleasant.\n\nGet there before the light goes at 6.\n\nBuy the fish and chips on the strip, then eat them on the grass under the pandanus with the beach in front of you. Tickle Park is the patch of lawn between Birtwill Street and the sand, with tables, taps and toilets.\n\nCheapest good dinner in town and, alone, easily the most pleasant — nobody is sitting opposite an empty chair.\n\nGet there before the light goes at about 6. The surf school trailer parks here too, so it is a busy little corner in the mornings.'},
-{id:'e8',cat:'eat',must:1,title:'Benny\'s Espresso — the coffee answer',
+{id:'e8',cat:'eat',mappin:'-26.53135,153.09238',must:1,title:'Benny\'s Espresso — the coffee answer',
  place:'Bennys Espresso Coolum Beach',
  wherelab:'Closest good coffee',spot:"Benny's Espresso",addr:'16/1776 David Low Way, Coolum Beach QLD 4573',
  links:[["Benny's Espresso",'https://bennysespresso.com.au/'],['Slide Coffee Roasters','https://www.slidecoffee.com.au/']],
@@ -511,7 +527,7 @@ const SEED=[
 {id:'p3',cat:'trip',wherelab:'Start of the loop',spot:'Montville village',addr:'Main St, Montville QLD 4560',pin:'-26.68295,152.88613',links:[['Montville — Visit Sunshine Coast','https://www.visitsunshinecoast.com/montville'],['Maleny — Visit Sunshine Coast','https://www.visitsunshinecoast.com/maleny'],['Mary Cairncross Reserve','https://mary-cairncross.sunshinecoast.qld.gov.au/'],['Kondalilla National Park','https://parks.qld.gov.au/parks/kondalilla']],route:{m:'driving',f:'-26.68295,152.88613',t:'-26.75815,152.84951',v:'',l:'Montville to Maleny, the spine of the loop'},photo:'img/p3.jpg',title:'The hinterland loop',
  place:'Montville Queensland',
  note:'Montville, Maleny, Mary Cairncross and possibly Kondalilla Falls, with the Glass House Mountains on the horizon the whole time. About an hour and ten each way, on winding roads.\n\nA full day, and a complete change of scene from the coast — rainforest, cool air, and views inland. Do it on a day the beach weather is poor.\n\nAbout an hour and ten each way, the last part winding up the range. A full day and a complete change of scene — rainforest, cool air, and the Glass House Mountains on the horizon the whole time.\n\nThe order that works: up through Eumundi and Mapleton, Kondalilla Falls first while your legs are fresh, then Montville for lunch and browsing, then Maleny for the bookshop, then Mary Cairncross for the lookout on the way out. Home down the range in the late afternoon.\n\nIf that is too much, drop Kondalilla — it is the one that needs real time and effort.\n\nDo it on a day the beach weather is poor. The hinterland is at its best in cloud, and the coast is not.\n\nOne thing that will catch you out: Montville Art Gallery, the big one with 41 artists in the old Queenslander, is closed Tuesday and Wednesday. So if you do this loop midweek the best gallery on the street is shut. Thursday or Friday.'},
-{id:'p4',cat:'trip',wherelab:'Where it is',spot:'Australia Zoo',addr:'Steve Irwin Way, Beerwah QLD 4519',links:[['Australia Zoo — tickets and hours','https://www.australiazoo.com.au/visit/tickets/']],title:'Australia Zoo',
+{id:'p4',cat:'trip',mappin:'-26.83392,152.96507',wherelab:'Where it is',spot:'Australia Zoo',addr:'Steve Irwin Way, Beerwah QLD 4519',links:[['Australia Zoo — tickets and hours','https://www.australiazoo.com.au/visit/tickets/']],title:'Australia Zoo',
  place:'Australia Zoo Beerwah',
  note:'An hour south at Beerwah. A full day and not cheap, but it is genuinely well run and the conservation work is real. Transfers from Coolum exist if you would rather not drive.\n\nAn hour south at Beerwah, off the Bruce Highway onto Steve Irwin Way. Open 9am to 5pm daily, adult entry A$77, free parking on site.\n\nEntry covers the conservation shows through the day, the free shuttle bus around the grounds and the wildlife hospital sneak peek. The animals start heading to bed about 4.30, so arriving late wastes the money.\n\nIt is a full day and it is not cheap, but it is genuinely well run and the conservation work behind it is real. Time your arrival around whatever is on in the Crocoseum.'},
 {id:'p5',cat:'trip',wherelab:'Where it is',spot:'The Ginger Factory',addr:'50 Pioneer Rd, Yandina QLD 4561',pin:'-26.55440,152.96068',links:[['The Ginger Factory','https://www.gingerfactory.com.au/']],photo:'img/p5.jpg',title:'The Ginger Factory, Yandina',
@@ -608,6 +624,12 @@ function rowHTML(i){
 }
 function render(){
   const list=filtered(), m=el('#main'); let h='';
+  if(view==='map'){
+    m.innerHTML=mapHTML();
+    el('.mareas').onclick=e=>{const b=e.target.closest('[data-area]');
+      if(b){area=b.dataset.area;render();}};
+    return;
+  }
   if(view==='ideas'){
     if(!list.length){
       h=`<div class="empty"><p>${query?'Nothing matches that.':'Nothing here yet.'}</p><button class="btn primary" data-open="new" style="max-width:200px;margin:0 auto">Add an idea</button></div>`;
@@ -633,6 +655,128 @@ function render(){
   }
   m.innerHTML=h;
 }
+
+/* ---- map ----
+   Drawn as plain SVG rather than tiles, so it works with no signal like the
+   rest of the app. Positions are real, projected Web Mercator. The coastline
+   is traced through the coastal pins themselves, so it is indicative rather
+   than surveyed - accurate enough to see where things sit relative to it. */
+let area='coast';
+const AREAS=[
+  ['coast','The coast',   -26.36,-26.72,153.02,153.16],
+  ['coolum','Coolum',     -26.512,-26.575,153.06,153.112],
+  ['noosa','Noosa',       -26.370,-26.42,153.055,153.130],
+  ['hinter','Hinterland', -26.40,-26.80,152.82,153.00],
+  ['south','South',       -26.60,-26.86,152.93,153.16],
+  ['bne','Brisbane run',  -26.45,-27.42,152.90,153.20],
+  ['all','Everything',    -26.24,-27.42,152.80,153.22]
+];
+const TOWNS=[
+  ['Noosa Heads',-26.3890,153.0920,1],['Sunshine Bch',-26.4049,153.1084,2],
+  ['Peregian',-26.4810,153.0971,2],['Coolum Beach',-26.5281,153.0916,1],
+  ['Marcoola',-26.6042,153.0970,2],['Maroochydore',-26.6546,153.0911,1],
+  ['Mooloolaba',-26.6833,153.1234,1],['Caloundra',-26.8038,153.1308,1],
+  ['Eumundi',-26.4771,152.9525,1],['Yandina',-26.5580,152.9544,2],
+  ['Nambour',-26.6306,152.9601,1],['Cooroy',-26.4205,152.9089,2],
+  ['Montville',-26.6830,152.8861,1],['Maleny',-26.7582,152.8495,1],
+  ['Beerwah',-26.8339,152.9651,2],['Tewantin',-26.3924,153.0410,2],
+  ['Boreen Point',-26.2662,152.9806,2],['Brisbane Airport',-27.3857,153.1185,1]
+];
+/* traced north to south through the coastal pins */
+const COAST=[[-26.3792,153.1195],[-26.3853,153.0943],[-26.4049,153.1084],
+  [-26.4810,153.0971],[-26.5314,153.0924],[-26.5467,153.1025],[-26.6042,153.0970],
+  [-26.6833,153.1234],[-26.8038,153.1308],[-27.0000,153.1600],[-27.3000,153.2100]];
+
+const merc=la=>(180/Math.PI)*Math.log(Math.tan(Math.PI/4+la*Math.PI/360));
+function mapHTML(){
+  const a=AREAS.find(x=>x[0]===area)||AREAS[0];
+  let [,label,latN,latS,lonW,lonE]=a;
+  let y0=merc(latN), y1=merc(latS);
+  // keep every area a shape that suits a phone, only ever widening the view
+  const MAXA=1.55, MINA=0.72, asp=(y0-y1)/(lonE-lonW);
+  if(asp>MAXA){const w=(y0-y1)/MAXA, m=(lonW+lonE)/2; lonW=m-w/2; lonE=m+w/2;}
+  else if(asp<MINA){const h=(lonE-lonW)*MINA, m=(y0+y1)/2; y0=m+h/2; y1=m-h/2;}
+  const Wd=1000, Ht=Math.round(Wd*(y0-y1)/(lonE-lonW));
+  const px=lo=>(lo-lonW)/(lonE-lonW)*Wd, py=la=>(y0-merc(la))/(y0-y1)*Ht;
+  const inside=(la,lo)=>merc(la)<=y0&&merc(la)>=y1&&lo>=lonW&&lo<=lonE;
+
+  const coast=COAST.map(([la,lo])=>`${px(lo).toFixed(1)},${py(la).toFixed(1)}`).join(' ');
+  const sea=`${coast} ${Wd+40},${Ht+40} ${Wd+40},-40`;
+
+  // gather what we can place
+  const pts=[];
+  filtered().forEach(i=>{
+    if(i.id.startsWith('u'))return;
+    const raw=i.pin||i.mappin; if(!raw)return;
+    const [la,lo]=raw.split(',').map(Number);
+    if(!inside(la,lo))return;
+    pts.push({i,la,lo,exact:!!i.pin});
+  });
+  // Nudge overlapping markers apart in pixel space, so a dense town like
+  // Coolum stays readable at every zoom. A hairline ties each marker back
+  // to where it actually is.
+  pts.forEach((p,k)=>{p.tx=px(p.lo); p.ty=py(p.la); p.x=p.tx; p.y=p.ty;
+    if(pts.some(q=>q!==p&&q.tx===p.tx&&q.ty===p.ty)){   // identical: break the tie
+      p.x+=Math.cos(k)*0.6; p.y+=Math.sin(k)*0.6;}});
+  const span=lonE-lonW;
+  const R=span<=0.12?32:span<=0.30?27:19;   // marker radius in viewBox units
+  const SEP=R*2.35, MAXOFF=R*2.4;           // never displace a marker beyond this
+  for(let it=0;it<80;it++){
+    let moved=false;
+    for(let i=0;i<pts.length;i++)for(let j=i+1;j<pts.length;j++){
+      const a=pts[i],b=pts[j];
+      const dx=b.x-a.x, dy=b.y-a.y, d=Math.hypot(dx,dy)||0.01;
+      if(d<SEP){
+        const push=(SEP-d)/2/d;
+        a.x-=dx*push; a.y-=dy*push; b.x+=dx*push; b.y+=dy*push; moved=true;
+      }
+    }
+    if(!moved)break;
+  }
+  // a nudged marker that ends up far from the truth is worse than an overlap
+  pts.forEach(p=>{
+    const dx=p.x-p.tx, dy=p.y-p.ty, d=Math.hypot(dx,dy);
+    if(d>MAXOFF){p.x=p.tx+dx/d*MAXOFF; p.y=p.ty+dy/d*MAXOFF;}
+  });
+
+  const towns=TOWNS.filter(([,la,lo,rk])=>inside(la,lo)&&(rk===1||span<=0.30)).map(([nm,la,lo])=>
+    `<g><circle cx="${px(lo).toFixed(1)}" cy="${py(la).toFixed(1)}" r="${(R*0.22).toFixed(1)}" fill="#8B5F68"/>
+     <text class="mt" style="font-size:${Math.round(R*0.98)}px" x="${(px(lo)+R*0.45).toFixed(1)}" y="${(py(la)-R*0.45).toFixed(1)}">${esc(nm)}</text></g>`).join('');
+
+  const marks=pts.map(p=>{
+    const c=CATS[p.i.cat]||CATS.note;
+    const x=p.x.toFixed(1), y=p.y.toFixed(1);
+    const off=Math.hypot(p.x-p.tx,p.y-p.ty)>3;
+    return `<g class="mk" data-open="${p.i.id}">
+      ${off?`<line x1="${p.tx.toFixed(1)}" y1="${p.ty.toFixed(1)}" x2="${x}" y2="${y}" stroke="${c.fg}" stroke-width="3" opacity=".5"/>
+      <circle cx="${p.tx.toFixed(1)}" cy="${p.ty.toFixed(1)}" r="5" fill="${c.fg}" opacity=".65"/>`:''}
+      <circle cx="${x}" cy="${y}" r="${R}" fill="${c.bg}" stroke="${c.fg}"
+        stroke-width="${p.exact?R/6:R/7.5}" ${p.exact?'':`stroke-dasharray="${(R*0.3).toFixed(1)} ${(R*0.23).toFixed(1)}"`}/>
+      <text class="me" style="font-size:${Math.round(R*1.03)}px" x="${x}" y="${y}">${c.em}</text>
+      <title>${esc(p.i.title)}</title></g>`;}).join('');
+
+  const chips=AREAS.map(x=>
+    `<button class="mbtn" data-area="${x[0]}" aria-pressed="${x[0]===area}">${esc(x[1])}</button>`).join('');
+  const legend=ORDER.filter(k=>pts.some(p=>p.i.cat===k)).map(k=>
+    `<span class="lg"><i style="background:${CATS[k].bg};border-color:${CATS[k].fg}">${CATS[k].em}</i>${CATS[k].label}</span>`).join('');
+  const missing=filtered().filter(i=>!i.id.startsWith('u')&&!i.pin&&!i.mappin&&i.place).length;
+
+  return `<div class="mapwrap">
+    <div class="mareas">${chips}</div>
+    <svg class="map" viewBox="0 0 ${Wd} ${Ht}" role="img" aria-label="Map of ${esc(label)}">
+      <rect x="-40" y="-40" width="${Wd+80}" height="${Ht+80}" fill="#FFF6F2"/>
+      <polygon points="${sea}" fill="#DCEBF0"/>
+      <polyline points="${coast}" fill="none" stroke="#9FC4CE" stroke-width="6"/>
+      ${marks}${towns}
+    </svg>
+    <p class="mnote">${pts.length} places shown${missing?` · ${missing} have no map position`:''}.
+      A dashed ring means the spot is approximate — the street or the town rather than the door.
+      The coast is traced through the beach pins, so treat it as indicative.</p>
+    <div class="legend">${legend}</div>
+  </div>`;
+}
+function S_items(){return S.items.filter(i=>!i.id.startsWith('u'));}
+
 function knowHTML(){
   if(cat!=='all'||query)return '';
   return `<div class="know"><h2>Getting your bearings</h2><ul>
@@ -770,8 +914,14 @@ function editor(id){
 }
 el('#scrim').onclick=closeSheet;
 el('#add').onclick=()=>editor(null);
-el('#tab-ideas').onclick=()=>{view='ideas';el('#tab-ideas').setAttribute('aria-selected','true');el('#tab-days').setAttribute('aria-selected','false');render();};
-el('#tab-days').onclick=()=>{view='days';el('#tab-days').setAttribute('aria-selected','true');el('#tab-ideas').setAttribute('aria-selected','false');render();};
+function setTab(v){
+  view=v;
+  ['ideas','days','map'].forEach(t=>el('#tab-'+t).setAttribute('aria-selected',t===v));
+  render();
+}
+el('#tab-ideas').onclick=()=>setTab('ideas');
+el('#tab-days').onclick=()=>setTab('days');
+el('#tab-map').onclick=()=>setTab('map');
 el('#chips').onclick=e=>{const b=e.target.closest('.chip');if(!b)return;cat=b.dataset.c;renderChips();render();};
 el('#q').oninput=e=>{query=e.target.value.trim().toLowerCase();el('#qclear').hidden=!query;render();};
 el('#qclear').onclick=()=>{el('#q').value='';query='';el('#qclear').hidden=true;render();};

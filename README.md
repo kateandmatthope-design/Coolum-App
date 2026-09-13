@@ -54,3 +54,8 @@ small list thumbnails |
   or two independent sources; otherwise use `addr` alone and say so in the note.
 - `route` draws a path on Google Maps: `{m,f,t,v,l}` for mode, from, to,
   pipe-separated waypoints and a label.
+- The Map tab draws plain SVG from the item coordinates — no tiles, no
+  library, so it works offline. `pin` shows a solid marker, `mappin` a dashed
+  one meaning the position is approximate. Marker size and label density
+  follow how much ground the chosen area covers, and markers are nudged apart
+  only up to a capped distance, with a hairline back to the true spot.
