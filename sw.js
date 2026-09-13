@@ -1,7 +1,7 @@
 /* Coolum — offline service worker.
    Bump VERSION whenever the cached file list changes; the old cache is
    dropped on activate. */
-const VERSION = 'v3';
+const VERSION = 'v4';
 const CACHE = 'coolum-' + VERSION;
 
 const FONT_CSS = 'https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&display=swap';
@@ -17,15 +17,36 @@ const PRECACHE = [
   './icons/icon-512-maskable.png',
   // photos, so the detail sheets still have them at the top of Mt Coolum
   './img/b1.jpg',
+  './img/b3.jpg',
+  './img/b4.jpg',
   './img/b5.jpg',
   './img/k1.jpg',
   './img/k3.jpg',
+  './img/k4.jpg',
   './img/k6.jpg',
   './img/k7.jpg',
+  './img/n1.jpg',
+  './img/p1.jpg',
   './img/p2.jpg',
+  './img/p3.jpg',
   './img/p5.jpg',
+  './img/r2.jpg',
+  './img/r4.jpg',
   './img/s1.jpg',
-  './img/s4.jpg'
+  './img/s2.jpg',
+  './img/s3.jpg',
+  './img/s4.jpg',
+  './img/s5.jpg',
+  './img/s7.jpg',
+  './img/s8.jpg',
+  './img/t1.jpg',
+  './img/t2.jpg',
+  './img/t5.jpg',
+  './img/t8.jpg',
+  './img/w1.jpg',
+  './img/w3.jpg',
+  './img/w4.jpg',
+  './img/w5.jpg'
 ];
 
 const isFont = u => u.hostname === 'fonts.googleapis.com' || u.hostname === 'fonts.gstatic.com';

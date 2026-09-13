@@ -36,10 +36,14 @@ overlay you can dismiss rather than throwing you out to Safari.
 | `index.html` | The whole app — content, styles and logic in one file |
 | `manifest.json` | Makes it installable: name, colours, icons, standalone display |
 | `sw.js` | Service worker. Caches the page, icons and fonts for offline use |
-| `icons/` | App icons generated from the app's own dusty pink and ochre palette |
+| `icons/` | App icons, generated from the app's own palette |
+| `img/` | Place photos, stored locally rather than hotlinked |
+| `CREDITS.md` | Photographer, licence and source URL for every photo |
 
 ## Notes for later changes
 
 - Bump `SEED_V` in `index.html` whenever seeded content changes, so ticks, stars
   and day assignments survive the update.
 - Bump `VERSION` in `sw.js` whenever the precached file list changes.
+- Photos are open-licenced from Wikimedia Commons. Adding one means adding the
+  row to `CREDITS.md` too — CC BY and CC BY-SA both require attribution.
