@@ -113,10 +113,15 @@ main{padding:4px 16px 0}
 .scrim.open{opacity:1;pointer-events:auto}
 .sheet{position:fixed;left:0;right:0;bottom:0;z-index:50;background:var(--blush);
   border-top-left-radius:22px;border-top-right-radius:22px;max-height:92vh;overflow-y:auto;
-  padding:8px 16px calc(20px + var(--safe-b));transform:translateY(101%);transition:transform .26s cubic-bezier(.32,.72,0,1)}
+  padding:0 16px calc(20px + var(--safe-b));transform:translateY(101%);transition:transform .26s cubic-bezier(.32,.72,0,1)}
 .sheet.open{transform:translateY(0)}
 @media (prefers-reduced-motion:reduce){.sheet,.scrim{transition:none}}
-.grab{width:38px;height:4px;border-radius:4px;background:var(--hair);margin:6px auto 14px}
+.sheettop{position:sticky;top:0;z-index:3;background:var(--blush);height:46px;
+  display:flex;align-items:center;justify-content:center}
+.grab{width:38px;height:4px;border-radius:4px;background:var(--hair)}
+.sheetx{position:absolute;top:50%;right:0;transform:translateY(-50%);width:38px;height:38px;
+  border-radius:50%;background:var(--shell);border:1px solid var(--hair-soft);color:var(--ink-soft);
+  display:flex;align-items:center;justify-content:center;font-size:.95rem;font-weight:700;line-height:1}
 .sheet h3{font-family:var(--display);font-size:1.4rem;margin:0 0 12px;letter-spacing:-.02em;line-height:1.15}
 label{display:block;font-size:.76rem;font-weight:700;color:var(--ink-soft);margin:13px 0 5px}
 .field{width:100%;min-height:var(--tap);padding:11px 13px;background:var(--paper);border:1.5px solid var(--hair);border-radius:11px}
@@ -527,7 +532,12 @@ function knowHTML(){
     <li>Early October is shoulder season: warm, not yet humid, school holidays over, and the last of the whale migration still going.</li>
   </ul></div>`;
 }
-function openSheet(html){el('#sheet').innerHTML='<div class="grab"></div>'+html;el('#sheet').classList.add('open');el('#scrim').classList.add('open');el('#sheet').scrollTop=0;}
+function openSheet(html){
+  const s=el('#sheet');
+  s.innerHTML='<div class="sheettop"><div class="grab"></div><button class="sheetx" aria-label="Close">✕</button></div>'+html;
+  s.classList.add('open');el('#scrim').classList.add('open');s.scrollTop=0;
+  s.querySelector('.sheetx').onclick=closeSheet;
+}
 function closeSheet(){el('#sheet').classList.remove('open');el('#scrim').classList.remove('open');}
 
 function detail(id){
@@ -559,7 +569,7 @@ function detail(id){
     </div>
     <div class="actions">
       <button class="btn primary" data-edit="${i.id}">Edit</button>
-      <button class="btn ghost" data-done="${i.id}">${i.done?'Undo':'Done'}</button>
+      <button class="btn ghost" data-done="${i.id}">${i.done?'Untick':'Tick off'}</button>
     </div>`);
   el('#dayseg').onclick=e=>{
     const b=e.target.closest('button'); if(!b)return;
