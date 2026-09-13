@@ -6,6 +6,11 @@
 <meta name="theme-color" content="#5E323C">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Coolum">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-180-apple.png">
+<link rel="icon" href="icons/icon-32.png" sizes="32x32" type="image/png">
 <title>Coolum · 5–10 Oct</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -406,6 +411,11 @@ let S={items:[],seedV:0};
 let view='ideas', cat='all', query='';
 const el=s=>document.querySelector(s);
 const esc=t=>String(t==null?'':t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+/* Installed as a standalone app, iOS opens a plain link in its in-app browser
+   overlay and keeps the app underneath; a _blank target bounces you out to
+   Safari instead. So drop the target once we are standalone. */
+const STANDALONE=window.navigator.standalone===true||window.matchMedia('(display-mode: standalone)').matches;
+const LT=STANDALONE?'rel="noopener"':'target="_blank" rel="noopener"';
 const uid=()=>'u'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 const save=()=>store.set(S);
 function toast(msg){const t=el('#toast');t.textContent=msg;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),1900);}
@@ -536,10 +546,10 @@ function detail(id){
     </div>
     ${i.note?`<div class="dtl-note">${esc(i.note)}</div>`:''}
     <div class="linkgrid">
-      ${i.url?`<a class="wide" href="${esc(i.url)}" target="_blank" rel="noopener">Official page</a>`:''}
-      <a href="${maps}" target="_blank" rel="noopener">Maps</a>
-      <a href="${pics}" target="_blank" rel="noopener">Photos</a>
-      <a class="wide" href="${web}" target="_blank" rel="noopener">Read more</a>
+      ${i.url?`<a class="wide" href="${esc(i.url)}" ${LT}>Official page</a>`:''}
+      <a href="${maps}" ${LT}>Maps</a>
+      <a href="${pics}" ${LT}>Photos</a>
+      <a class="wide" href="${web}" ${LT}>Read more</a>
     </div>
     <label>Which day?</label>
     <div class="seg" id="dayseg">
@@ -623,6 +633,16 @@ el('#import').onclick=()=>{
     r.readAsText(f.files[0]);};
   f.click();
 };
+if('serviceWorker' in navigator && location.protocol!=='file:'){
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('sw.js').catch(()=>{});
+    let had=!!navigator.serviceWorker.controller;
+    navigator.serviceWorker.addEventListener('controllerchange',()=>{
+      if(had)toast('Updated \u2014 reopen for the newest version');
+      had=true;
+    });
+  });
+}
 boot();
 </script>
 </body>
