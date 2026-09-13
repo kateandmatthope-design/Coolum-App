@@ -411,11 +411,12 @@ let S={items:[],seedV:0};
 let view='ideas', cat='all', query='';
 const el=s=>document.querySelector(s);
 const esc=t=>String(t==null?'':t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-/* Installed as a standalone app, iOS opens a plain link in its in-app browser
-   overlay and keeps the app underneath; a _blank target bounces you out to
-   Safari instead. So drop the target once we are standalone. */
-const STANDALONE=window.navigator.standalone===true||window.matchMedia('(display-mode: standalone)').matches;
-const LT=STANDALONE?'rel="noopener"':'target="_blank" rel="noopener"';
+/* Installed as a standalone app, iOS needs target="_blank" to open a link in
+   its dismissible in-app overlay (swipe down or Done, back to the app
+   underneath). A plain same-window link does the opposite of what you'd
+   expect: it hijacks the app's own window with no chrome at all, and there
+   is no way back except closing the app in the switcher and relaunching. */
+const LT='target="_blank" rel="noopener"';
 const uid=()=>'u'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 const save=()=>store.set(S);
 function toast(msg){const t=el('#toast');t.textContent=msg;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),1900);}
